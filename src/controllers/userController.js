@@ -3,7 +3,7 @@ const response = require("../helpers/response");
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const unlinkImage = require('../common/image/unlinkImage')
-const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification } = require('../services/userService')
+const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword } = require('../services/userService')
 const User = require('../models/User');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
@@ -30,6 +30,30 @@ const verifyEmail = catchAsync(async (req, res) => {
 });
 
 
+// Verify Email
+const forgotPassword = catchAsync(async (req, res) => {
+    const result = await forgetPassword(req.body)
+
+    sendResponse(res, { statusCode: 200, data: result, message: 'Sent One Time Code successfully', success: true });
+});
+
+
+// Forget Password Verify One time Code successfully
+const forgotPasswordVerifyOneTimeCode = catchAsync(async (req, res) => {
+    const result = await forgetPasswordVerifyOneTimeCode(req.body)
+
+    sendResponse(res, { statusCode: 200, data: result, message: 'User verified successfully', success: true });
+});
+
+
+// Forget Password Verify One time Code successfully
+const resetUpdatedPassword = catchAsync(async (req, res) => {
+    const result = await resetUpdatePassword(req.body)
+
+    sendResponse(res, { statusCode: 200, data: result, message: 'Password updated successfully', success: true });
+});
+
+
 
 
 
@@ -50,4 +74,4 @@ const singleUser = catchAsync(async (req, res) => {
 })
 
 
-module.exports = { signIn, createUser, verifyEmail, updateProfile, allUsers, singleUser }
+module.exports = { signIn, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, updateProfile, allUsers, singleUser }

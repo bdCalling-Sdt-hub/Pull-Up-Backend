@@ -108,6 +108,84 @@ const emailVerification = async (userBody) => {
   }
 }
 
+// Forgot Password
+const forgetPassword = async (userBody) => {
+  const { email } = userBody;
+
+  // Check if the user already exists
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "User Not Found")
+  }
+
+  // Generate OTC (One-Time Code)
+  const oneTimeCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+
+  // Store the OTC and its expiration time in the database
+  user.oneTimeCode = oneTimeCode;
+  await user.save();
+
+  // Prepare email for password reset
+  const emailData = {
+    email,
+    subject: 'Password Reset Email',
+    html: `
+        <h1>Hello, ${user.name}</h1>
+        <p>Your One Time Code is <h3>${oneTimeCode}</h3> to reset your password</p>
+        <small>This Code is valid for 3 minutes</small>
+      `
+  }
+
+  // Send email
+  try {
+    await emailWithNodemailer(emailData);
+  } catch (emailError) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Failed to send verification email")
+  }
+
+  // Set a timeout to update the oneTimeCode to null after 1 minute
+  setTimeout(async () => {
+    try {
+      user.oneTimeCode = null;
+      await user.save();
+      console.log('oneTimeCode reset to null after 3 minute');
+    } catch (error) {
+      console.error('Error updating oneTimeCode:', error);
+    }
+  }, 180000); // 3 minute in milliseconds
+
+  // res.status(201).json({ message: 'Sent One Time Code successfully' });
+  return user;
+
+}
+
+// Forgot Password Verify One Time Code
+const forgetPasswordVerifyOneTimeCode = async (userBody) => {
+  const { email, oneTimeCode } = userBody;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
+  } else if (user.oneTimeCode === oneTimeCode) {
+    user.emailVerified = true;
+    await user.save();
+    return user;
+  } else {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Failed to verify user');
+  }
+}
+
+// Reset update password
+const resetUpdatePassword = async (userBody) => {
+  const { email, password } = userBody;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
+  } else {
+    user.password = password;
+    await user.save();
+    return user;
+  }
+}
 
 
 
@@ -173,8 +251,9 @@ module.exports = {
   addUser,
   userSignIn,
   emailVerification,
-
-
+  forgetPassword,
+  forgetPasswordVerifyOneTimeCode,
+  resetUpdatePassword,
 
   updateUser,
   getAllUsers,

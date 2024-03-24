@@ -1,5 +1,5 @@
 const express = require('express');
-const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail } = require('../controllers/userController');
+const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword } = require('../controllers/userController');
 const router = express.Router();
 const fs = require('fs');
 const userFileUploadMiddleware = require("../middlewares/fileUpload");
@@ -8,7 +8,6 @@ const UPLOADS_FOLDER_USERS = "./public/uploads/users";
 const uploadUsers = userFileUploadMiddleware(UPLOADS_FOLDER_USERS);
 const { isValidUser, verifyRefreshToken } = require('../middlewares/auth')
 const validationMiddleware = require('../middlewares/user/signupValidation');
-const { getSingleUser } = require('../services/userService');
 const auth = require('../middlewares/auth');
 
 if (!fs.existsSync(UPLOADS_FOLDER_USERS)) {
@@ -25,6 +24,9 @@ if (!fs.existsSync(UPLOADS_FOLDER_USERS)) {
 router.post('/create-user', createUser);
 router.post('/sign-in', signIn);
 router.post('/verify-email', verifyEmail);
+router.post('/forgot-password', forgotPassword);
+router.post('/fp-verify-code', forgotPasswordVerifyOneTimeCode);
+router.post('/reset-update-password', resetUpdatedPassword);
 
 
 
