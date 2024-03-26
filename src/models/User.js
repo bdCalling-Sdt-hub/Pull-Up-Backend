@@ -28,6 +28,30 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     oneTimeCode: { type: String, required: false },
     emailVerified: { type: Boolean, default: false },
+    accountType: { type: String },
+    businessName: { type: String },
+    businessNumber: { type: String },
+    businessEmail: { type: String },
+    businessDescription: { type: String },
+    businessWebsite: { type: String },
+
+    organisationName: { type: String },
+    organisationNumber: { type: String },
+    organisationEmail: { type: String },
+    organisationDescription: { type: String },
+    organisationWebsite: { type: String },
+
+    businessHours: { type: String },
+    location: { type: String },
+    mapLocation: {
+        type: {
+            latitude: Number,
+            longitude: Number
+        }
+    },
+    packageDuration: { type: String, enum: ['daily', 'weekly', 'monthly'] },
+    activationDate: { type: Date },
+    expirationDate: { type: Date },
 }, { timestamps: true }, {
     toJSON: {
         transform(doc, ret) {

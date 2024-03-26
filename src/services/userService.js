@@ -5,7 +5,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const QueryBuilder = require('../builder/QueryBuilder');
 const emailWithNodemailer = require('../helpers/email');
-
+const dayjs = require('dayjs');
+const Package = require('../models/Package');
+const unlinkImage = require('../common/image/unlinkImage');
 
 // Define a map to store user timers for sign up requests
 const userTimers = new Map();
@@ -187,6 +189,104 @@ const resetUpdatePassword = async (userBody) => {
   }
 }
 
+// Upgrade Account
+const upgradeAccount = async (userBody, loginId) => {
+  // console.log(accountType, location, packageDuration, activationDate, amount, currency);
+  const { accountType, location, packageDuration, activationDate, mapLocation } = userBody;
+
+  const user = await User.findOne({ _id: loginId });
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
+  }
+
+  user.accountType = accountType;
+  user.location = location;
+  user.packageDuration = packageDuration;
+  user.activationDate = activationDate;
+  user.mapLocation = mapLocation;
+
+  const expirationDay = (activationDate) => {
+    return dayjs(activationDate).add(1, "day").toDate();
+  };
+
+  const expirationWeekly = (activationDate) => {
+    return dayjs(activationDate).add(7, "day").toDate();
+  };
+
+  const expirationMonth = (activationDate) => {
+    return dayjs(activationDate).add(1, "month").toDate();
+  };
+
+  if (packageDuration === 'daily') {
+    const expirationDate = expirationDay(activationDate);
+    user.expirationDate = expirationDate;
+  }
+
+  if (packageDuration === 'weekly') {
+    const expirationDate = expirationWeekly(activationDate);
+    user.expirationDate = expirationDate;
+  }
+
+  if (packageDuration === 'monthly') {
+    const expirationDate = expirationMonth(activationDate);
+    user.expirationDate = expirationDate;
+  }
+
+  user.save();
+
+  return user;
+}
+
+// update account
+const updatedAccount = async (userBody, loginEmail, file) => {
+  const { businessName, businessNumber, businessEmail, businessDescription, businessWebsite, businessHours, businessLocation, name, phoneNumber, email, organisationName, organisationNumber, organisationEmail, organisationDescription, organisationWebsite, organisationLocation } = userBody;
+
+  const user = await User.findOne({ email: loginEmail });
+
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "User not Found");
+  }
+
+  if (user.accountType === 'business') {
+    user.businessName = businessName;
+    user.businessNumber = businessNumber;
+    user.businessEmail = businessEmail;
+    user.businessDescription = businessDescription;
+    user.businessWebsite = businessWebsite;
+    user.businessHours = businessHours;
+    user.location = !businessLocation ? user.location : businessLocation;
+  } else if (user.accountType === 'shopping') {
+    user.name = !name ? user.name : name;
+    user.phoneNumber = !phoneNumber ? user.phoneNumber : phoneNumber;
+    user.email = !email ? user.email : email;
+  } else if (user.accountType === 'organisation') {
+    user.organisationName = organisationName;
+    user.organisationNumber = organisationNumber;
+    user.organisationEmail = organisationEmail;
+    user.organisationDescription = organisationDescription;
+    user.organisationWebsite = organisationWebsite;
+    user.location = !organisationLocation ? user.location : organisationLocation;
+  } else {
+    throw new AppError(httpStatus[400], 'Invalid Account type')
+  }
+
+  if (file) {
+
+    const defaultPath = 'public\\uploads\\users\\user.png';
+    // console.log('req.file', file.filename, user.image.path, defaultPath);
+    if (user.image.path !== defaultPath) {
+      await unlinkImage(user.image.path);
+    }
+
+    user.image = {
+      publicFileUrl: `${process.env.IMAGE_UPLOAD_BACKEND_DOMAIN}/uploads/users/${file?.filename}`,
+      path: file.path
+    }
+  }
+
+  const updatedUser = await user.save();
+  return updatedUser;
+}
 
 
 
@@ -254,6 +354,8 @@ module.exports = {
   forgetPassword,
   forgetPasswordVerifyOneTimeCode,
   resetUpdatePassword,
+  upgradeAccount,
+  updatedAccount,
 
   updateUser,
   getAllUsers,

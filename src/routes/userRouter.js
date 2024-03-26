@@ -1,5 +1,5 @@
 const express = require('express');
-const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword } = require('../controllers/userController');
+const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount } = require('../controllers/userController');
 const router = express.Router();
 const fs = require('fs');
 const userFileUploadMiddleware = require("../middlewares/fileUpload");
@@ -21,6 +21,8 @@ if (!fs.existsSync(UPLOADS_FOLDER_USERS)) {
     });
 }
 
+
+// User 
 router.post('/create-user', createUser);
 router.post('/sign-in', signIn);
 router.post('/verify-email', verifyEmail);
@@ -28,6 +30,10 @@ router.post('/forgot-password', forgotPassword);
 router.post('/fp-verify-code', forgotPasswordVerifyOneTimeCode);
 router.post('/reset-update-password', resetUpdatedPassword);
 
+
+// Account Upgrade
+router.post('/upgraded-account', auth('user'), upgradedAccount);
+router.post('/update-account', auth('user'), [uploadUsers.single("image")], updateAccount);
 
 
 
