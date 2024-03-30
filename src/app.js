@@ -6,6 +6,8 @@ const productRouter = require('./routes/productRouter');
 const eventRouter = require('./routes/eventRouter');
 const reviewRouter = require('./routes/reviewRouter');
 const privacyRouter = require('./routes/privacyRouter');
+const termsRouter = require('./routes/termsRouter');
+const aboutRouter = require('./routes/aboutRouter');
 
 const { notFoundHandler, errorHandler } = require('./middlewares/errorHandler');
 const mongoose = require('mongoose');
@@ -52,6 +54,8 @@ app.use('/api/product', productRouter);
 app.use('/api/event', eventRouter);
 app.use('/api/review', reviewRouter);
 app.use('/api/privacy', privacyRouter);
+app.use('/api/terms', termsRouter);
+app.use('/api/about', aboutRouter);
 
 //testing API is alive
 app.get('/test', (req, res) => {
