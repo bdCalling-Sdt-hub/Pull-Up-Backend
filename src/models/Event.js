@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
-const productSchema = new mongoose.Schema({
+const eventSchema = new mongoose.Schema({
     name: { type: String, required: [true, 'Name is must be given'], trim: true },
     description: { type: String, required: [true, 'Description is must be given'], trim: true },
     price: { type: String, required: [true, 'Price is required'], trim: true },
@@ -12,7 +12,7 @@ const productSchema = new mongoose.Schema({
             path: 'public\\uploads\\product\\user.png'
         }
     },
-    keywords: [],
+    location: { type: String, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true }, {
     toJSON: {
@@ -24,4 +24,4 @@ const productSchema = new mongoose.Schema({
 
 );
 
-module.exports = mongoose.model('Product', productSchema);
+module.exports = mongoose.model('Event', eventSchema);

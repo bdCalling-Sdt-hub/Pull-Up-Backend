@@ -27,6 +27,7 @@ class QueryBuilder {
         const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
         // Removing unnecessary elements from the copiedQueryObject list
         excludeFields.forEach((element) => delete copiedQueryObject[element]);
+        console.log(copiedQueryObject)
         this.modelQuery = this.modelQuery.find(copiedQueryObject);
         return this;
     }

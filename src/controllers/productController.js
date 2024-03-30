@@ -3,7 +3,7 @@ const response = require("../helpers/response");
 const jwt = require('jsonwebtoken');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
-const { addProduct, getAllProducts, getSingleProduct } = require('../services/productService');
+const { addProduct, getAllProducts, getSingleProduct, nerByProduct, findKeywords } = require('../services/productService');
 
 
 // create a user
@@ -22,5 +22,15 @@ const singleProduct = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, data: result, message: 'User Retrieve successfully', success: true })
 })
 
+const nerByProducts = catchAsync(async (req, res) => {
+    const result = await nerByProduct(req.query)
+    sendResponse(res, { statusCode: 200, data: result, message: 'Near By Product Retrieve successfully', success: true })
+})
 
-module.exports = { createProduct, allProduct, singleProduct }
+const findKeyword = catchAsync(async (req, res) => {
+    const result = await findKeywords(req.query)
+    sendResponse(res, { statusCode: 200, data: result, message: 'Keywords Retrieve successfully', success: true })
+})
+
+
+module.exports = { createProduct, allProduct, singleProduct, nerByProducts, findKeyword }

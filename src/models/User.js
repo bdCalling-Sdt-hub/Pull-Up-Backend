@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     oneTimeCode: { type: String, required: false },
     emailVerified: { type: Boolean, default: false },
-    accountType: { type: String },
+    accountType: { type: String, enum: ['business', 'organisation', 'shopping'] },
     businessName: { type: String },
     businessNumber: { type: String },
     businessEmail: { type: String },
@@ -46,12 +46,15 @@ const userSchema = new mongoose.Schema({
     mapLocation: {
         type: {
             latitude: Number,
-            longitude: Number
+            longitude: Number,
+            coordinates: [Number]
         }
     },
     packageDuration: { type: String, enum: ['daily', 'weekly', 'monthly'] },
     activationDate: { type: Date },
     expirationDate: { type: Date },
+
+    averageRating: { type: Number, required: true },
 }, { timestamps: true }, {
     toJSON: {
         transform(doc, ret) {

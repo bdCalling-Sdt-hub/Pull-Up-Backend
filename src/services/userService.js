@@ -191,19 +191,20 @@ const resetUpdatePassword = async (userBody) => {
 
 // Upgrade Account
 const upgradeAccount = async (userBody, loginId) => {
-  // console.log(accountType, location, packageDuration, activationDate, amount, currency);
   const { accountType, location, packageDuration, activationDate, mapLocation } = userBody;
-
   const user = await User.findOne({ _id: loginId });
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
   }
 
+  const coordinates = Object.values(mapLocation)
+  const mapLocationData = { ...mapLocation, coordinates }
+
   user.accountType = accountType;
   user.location = location;
   user.packageDuration = packageDuration;
   user.activationDate = activationDate;
-  user.mapLocation = mapLocation;
+  user.mapLocation = mapLocationData;
 
   const expirationDay = (activationDate) => {
     return dayjs(activationDate).add(1, "day").toDate();
@@ -267,7 +268,7 @@ const updatedAccount = async (userBody, loginEmail, file) => {
     user.organisationWebsite = organisationWebsite;
     user.location = !organisationLocation ? user.location : organisationLocation;
   } else {
-    throw new AppError(httpStatus[400], 'Invalid Account type')
+    throw new AppError(httpStatus.METHOD_NOT_ALLOWED, 'Invalid Account type')
   }
 
   if (file) {

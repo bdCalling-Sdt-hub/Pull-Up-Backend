@@ -3,6 +3,8 @@ const cors = require('cors');
 const userRouter = require('./routes/userRouter');
 const packageRouter = require('./routes/packageRouter');
 const productRouter = require('./routes/productRouter');
+const eventRouter = require('./routes/eventRouter');
+const reviewRouter = require('./routes/reviewRouter');
 
 const { notFoundHandler, errorHandler } = require('./middlewares/errorHandler');
 const mongoose = require('mongoose');
@@ -46,6 +48,8 @@ app.use(cors(
 app.use('/api/users', userRouter);
 app.use('/api/package', packageRouter);
 app.use('/api/product', productRouter);
+app.use('/api/event', eventRouter);
+app.use('/api/review', reviewRouter);
 
 //testing API is alive
 app.get('/test', (req, res) => {
