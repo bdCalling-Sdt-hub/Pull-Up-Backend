@@ -1,6 +1,6 @@
 const express = require('express');
 const auth = require('../middlewares/auth');
-const { createProduct, allProduct, singleProduct, nerByProducts, findKeyword } = require('../controllers/productController');
+const { createProduct, allProduct, singleProduct, nerByProducts, findKeyword, findShops, singleShop } = require('../controllers/productController');
 const router = express.Router();
 
 const fs = require('fs');
@@ -23,6 +23,9 @@ router.post('/create-product', auth('user'), [uploadUsers.single("image")], crea
 router.get('/', allProduct);
 router.get('/near-product', nerByProducts);
 router.get('/keywords', findKeyword);
+// Shops
+router.get('/shops', auth('admin'), findShops);
+router.get('/:id', singleShop);
 router.get('/:id', singleProduct);
 
 module.exports = router;

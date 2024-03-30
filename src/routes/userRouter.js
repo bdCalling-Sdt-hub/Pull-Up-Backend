@@ -1,5 +1,5 @@
 const express = require('express');
-const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount } = require('../controllers/userController');
+const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount, usersStatistics, changePassword } = require('../controllers/userController');
 const router = express.Router();
 const fs = require('fs');
 const userFileUploadMiddleware = require("../middlewares/fileUpload");
@@ -30,15 +30,20 @@ router.post('/forgot-password', forgotPassword);
 router.post('/fp-verify-code', forgotPasswordVerifyOneTimeCode);
 router.post('/reset-update-password', resetUpdatedPassword);
 
+// change password
+router.post('/change-password', changePassword);
 
 // Account Upgrade
 router.post('/upgraded-account', auth('user'), upgradedAccount);
 router.post('/update-account', auth('user'), [uploadUsers.single("image")], updateAccount);
 
-
-
-router.get('/', auth('manager'), allUsers);
-router.get('/:id', auth('manager', 'user'), singleUser);
+// User
+router.get('/', auth('admin'), allUsers);
+router.get('/user-statistics', auth('admin'), usersStatistics);
 router.put('/', [uploadUsers.single("image")], updateProfile);
+
+
+router.get('/:id', auth('manager', 'user'), singleUser);
+
 
 module.exports = router;

@@ -113,11 +113,33 @@ const findKeywords = async (body) => {
 
 }
 
+// Shops
+const getShopes = async (query) => {
+    const userModel = new QueryBuilder(User.find(), query)
+        .search()
+        .filter()
+        .paginate()
+        .sort()
+        .fields();
+
+    const result = await userModel.modelQuery;
+    const meta = await userModel.meta();
+    // const organisationUsers = result.filter(user => user.accountType === 'business');
+    return { result, meta }
+}
+
+const getSingleShop = async (id) => {
+    const result = await User.findById(id)
+    return result
+}
+
 
 module.exports = {
     addProduct,
     getAllProducts,
     getSingleProduct,
     nerByProduct,
-    findKeywords
+    findKeywords,
+    getShopes,
+    getSingleShop
 }

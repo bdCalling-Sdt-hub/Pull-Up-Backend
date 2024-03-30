@@ -3,7 +3,7 @@ const response = require("../helpers/response");
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const unlinkImage = require('../common/image/unlinkImage')
-const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword, upgradeAccount, updatedAccount } = require('../services/userService')
+const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword, upgradeAccount, updatedAccount, getUsersStatistics, getChangePassword } = require('../services/userService')
 const User = require('../models/User');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
@@ -67,10 +67,19 @@ const updateAccount = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, data: result, message: "User updated successfully", success: true });
 })
 
+// All User
+const allUsers = catchAsync(async (req, res) => {
+    const result = await getAllUsers(req.query)
+    sendResponse(res, { statusCode: 200, data: result, message: 'Users Retrieve successfully', success: true })
+});
 
+// Users Statistics
+const usersStatistics = catchAsync(async (req, res) => {
+    const result = await getUsersStatistics(req.query)
+    sendResponse(res, { statusCode: 200, data: result, message: 'Users Retrieve successfully', success: true })
+});
 
-
-
+// Update Profile
 const updateProfile = catchAsync(async (req, res) => {
     const file = req.file;
     const result = await updateUser(req.body, { file })
@@ -78,14 +87,16 @@ const updateProfile = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, data: result, message: 'User Update successfully', success: true })
 });
 
-const allUsers = catchAsync(async (req, res) => {
-    const result = await getAllUsers(req.query)
-    sendResponse(res, { statusCode: 200, data: result, message: 'Users Retrieve successfully', success: true })
-});
+
 const singleUser = catchAsync(async (req, res) => {
     const result = await getSingleUser(req.params.id)
     sendResponse(res, { statusCode: 200, data: result, message: 'User Retrieve successfully', success: true })
 })
 
+const changePassword = catchAsync(async (req, res) => {
+    const result = await getChangePassword(req.body)
+    sendResponse(res, { statusCode: 200, data: result, message: 'Password Changed successfully', success: true })
+})
 
-module.exports = { signIn, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount, updateProfile, allUsers, singleUser }
+
+module.exports = { signIn, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, allUsers, usersStatistics, updateAccount, updateProfile, singleUser, changePassword }

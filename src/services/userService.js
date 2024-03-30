@@ -8,6 +8,7 @@ const emailWithNodemailer = require('../helpers/email');
 const dayjs = require('dayjs');
 const Package = require('../models/Package');
 const unlinkImage = require('../common/image/unlinkImage');
+const moment = require('moment');
 
 // Define a map to store user timers for sign up requests
 const userTimers = new Map();
@@ -289,44 +290,7 @@ const updatedAccount = async (userBody, loginEmail, file) => {
   return updatedUser;
 }
 
-
-
-
-
-
-
-
-const updateUser = async (userBody, file) => {
-
-  const { name, userName, email } = userBody;
-
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "User Not Found")
-  }
-
-  user.name = !name ? user.name : name;
-  user.userName = !userName ? user.userName : userName;
-
-  if (file) {
-
-    const defaultPath = 'public\\uploads\\users\\user.png';
-    console.log('req.file', file, user.image.path, defaultPath);
-    if (user.image.path !== defaultPath) {
-      await unlinkImage(user.image.path);
-    }
-
-    user.image = {
-      publicFileUrl: `${process.env.IMAGE_UPLOAD_BACKEND_DOMAIN}/uploads/users/${file?.file?.filename}`,
-      path: file.path
-    }
-  }
-
-  const updatedUser = await user.save();
-  return updatedUser;
-}
-
+// All Users
 const getAllUsers = async (query) => {
   const userModel = new QueryBuilder(User.find(), query)
     .search()
@@ -340,9 +304,111 @@ const getAllUsers = async (query) => {
   return { result, meta };
 }
 
+// Users Statistics
+const getUsersStatistics = async (query) => {
+  const userModel = new QueryBuilder(User.find(), query)
+    .search()
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+
+  const result = await userModel.modelQuery;
+
+  const statistics = {};
+
+  result.forEach(user => {
+    const createdAt = moment(user.createdAt);
+    const year = createdAt.year();
+    const month = createdAt.month() + 1; // Months are zero-based
+    const day = createdAt.date();
+    const accountType = user.accountType;
+
+    // Check if accountType is defined and not null
+    if (accountType !== undefined && accountType !== null) {
+      // Create keys if not exist
+      if (!statistics[year]) {
+        statistics[year] = {};
+      }
+      if (!statistics[year][month]) {
+        statistics[year][month] = {};
+      }
+      if (!statistics[year][month][day]) {
+        statistics[year][month][day] = {};
+      }
+      if (!statistics[year][month][day][accountType]) {
+        statistics[year][month][day][accountType] = 0;
+      }
+
+      // Increment count for accountType
+      statistics[year][month][day][accountType]++;
+    }
+  });
+
+  return statistics;
+}
+
+// Update User
+const updateUser = async (userBody, file) => {
+
+  const { name, phoneNumber, email } = userBody;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "User Not Found")
+  }
+
+  user.name = !name ? user.name : name;
+  user.phoneNumber = !phoneNumber ? user.phoneNumber : phoneNumber;
+
+  if (file) {
+
+    const defaultPath = 'public\\uploads\\users\\user.png';
+    // console.log('req.file', file, user.image.path, defaultPath);
+    if (user.image.path !== defaultPath) {
+      await unlinkImage(user?.image?.path);
+    }
+
+    user.image = {
+      publicFileUrl: `${process.env.IMAGE_UPLOAD_BACKEND_DOMAIN}/uploads/users/${file?.file?.filename}`,
+      path: file.file.path
+    }
+  }
+
+  const updatedUser = await user.save();
+  return updatedUser;
+}
+
 const getSingleUser = async (id) => {
   const result = await User.findById(id)
   return result
+}
+
+const getChangePassword = async (body) => {
+
+  const { email, currentPassword, newPassword, reTypedPassword } = body;
+
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+
+  if (!passwordMatch) {
+    throw new AppError(httpStatus.NOT_ACCEPTABLE, 'Current password is incorrect');
+  }
+
+  if (newPassword !== reTypedPassword) {
+    throw new AppError(httpStatus.NOT_ACCEPTABLE, 'New password and re-typed password do not match');
+  }
+
+  user.password = newPassword;
+  await user.save()
+
+  return user;
 }
 
 
@@ -357,8 +423,9 @@ module.exports = {
   resetUpdatePassword,
   upgradeAccount,
   updatedAccount,
-
-  updateUser,
   getAllUsers,
-  getSingleUser
+  getUsersStatistics,
+  updateUser,
+  getSingleUser,
+  getChangePassword
 }

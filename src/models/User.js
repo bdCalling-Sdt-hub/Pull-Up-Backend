@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema({
     activationDate: { type: Date },
     expirationDate: { type: Date },
 
-    averageRating: { type: Number, required: true },
+    averageRating: { type: Number },
 }, { timestamps: true }, {
     toJSON: {
         transform(doc, ret) {

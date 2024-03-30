@@ -59,6 +59,8 @@ const getSingleEvent = async (id) => {
 }
 
 
+
+
 module.exports = {
     addEvent,
     getAllEvents,
