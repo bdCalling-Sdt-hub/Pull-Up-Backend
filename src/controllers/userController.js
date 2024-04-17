@@ -32,7 +32,7 @@ const verifyEmail = catchAsync(async (req, res) => {
 
 // Verify Email
 const forgotPassword = catchAsync(async (req, res) => {
-    const result = await forgetPassword(req.body)
+    const result = await forgetPassword(req.user.email);
 
     sendResponse(res, { statusCode: 200, data: result, message: 'Sent One Time Code successfully', success: true });
 });
@@ -40,7 +40,7 @@ const forgotPassword = catchAsync(async (req, res) => {
 
 // Forget Password Verify One time Code successfully
 const forgotPasswordVerifyOneTimeCode = catchAsync(async (req, res) => {
-    const result = await forgetPasswordVerifyOneTimeCode(req.body)
+    const result = await forgetPasswordVerifyOneTimeCode(req.body, req.user.email)
 
     sendResponse(res, { statusCode: 200, data: result, message: 'User verified successfully', success: true });
 });
@@ -48,7 +48,7 @@ const forgotPasswordVerifyOneTimeCode = catchAsync(async (req, res) => {
 
 // Forget Password Verify One time Code successfully
 const resetUpdatedPassword = catchAsync(async (req, res) => {
-    const result = await resetUpdatePassword(req.body)
+    const result = await resetUpdatePassword(req.body, req.user.email)
 
     sendResponse(res, { statusCode: 200, data: result, message: 'Password updated successfully', success: true });
 });
@@ -94,7 +94,7 @@ const singleUser = catchAsync(async (req, res) => {
 })
 
 const changePassword = catchAsync(async (req, res) => {
-    const result = await getChangePassword(req.body)
+    const result = await getChangePassword(req.body, req.user.email)
     sendResponse(res, { statusCode: 200, data: result, message: 'Password Changed successfully', success: true })
 })
 

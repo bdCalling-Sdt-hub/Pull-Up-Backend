@@ -79,6 +79,7 @@ const addUser = async (userBody) => {
 
 // Sign in a user
 const userSignIn = async (userBody) => {
+  console.log(userBody)
   const { email, password } = userBody;
   const user = await User.findOne({ email });
   if (!user) {
@@ -112,9 +113,8 @@ const emailVerification = async (userBody) => {
 }
 
 // Forgot Password
-const forgetPassword = async (userBody) => {
-  const { email } = userBody;
-
+const forgetPassword = async (email) => {
+  console.log(email)
   // Check if the user already exists
   const user = await User.findOne({ email });
   if (!user) {
@@ -163,8 +163,8 @@ const forgetPassword = async (userBody) => {
 }
 
 // Forgot Password Verify One Time Code
-const forgetPasswordVerifyOneTimeCode = async (userBody) => {
-  const { email, oneTimeCode } = userBody;
+const forgetPasswordVerifyOneTimeCode = async (userBody, email) => {
+  const {  oneTimeCode } = userBody;
   const user = await User.findOne({ email });
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
@@ -178,8 +178,8 @@ const forgetPasswordVerifyOneTimeCode = async (userBody) => {
 }
 
 // Reset update password
-const resetUpdatePassword = async (userBody) => {
-  const { email, password } = userBody;
+const resetUpdatePassword = async (userBody,email) => {
+  const { password } = userBody;
   const user = await User.findOne({ email });
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
@@ -385,9 +385,9 @@ const getSingleUser = async (id) => {
   return result
 }
 
-const getChangePassword = async (body) => {
+const getChangePassword = async (body, email) => {
 
-  const { email, currentPassword, newPassword, reTypedPassword } = body;
+  const { currentPassword, newPassword, confirmPassword } = body;
 
   const user = await User.findOne({ email })
 
@@ -401,7 +401,7 @@ const getChangePassword = async (body) => {
     throw new AppError(httpStatus.NOT_ACCEPTABLE, 'Current password is incorrect');
   }
 
-  if (newPassword !== reTypedPassword) {
+  if (newPassword !== confirmPassword) {
     throw new AppError(httpStatus.NOT_ACCEPTABLE, 'New password and re-typed password do not match');
   }
 

@@ -3,6 +3,7 @@ const AppError = require('../errors/AppError');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const QueryBuilder = require('../builder/QueryBuilder');
+const { addNotification } = require('./notificationService');
 
 // Create a new user
 const addProduct = async (userBody, email, file) => {
@@ -35,6 +36,20 @@ const addProduct = async (userBody, email, file) => {
             image: imageUrl,
             userId: user._id
         });
+
+
+        const adminNotification = {
+            message: `${user.name} Created New ${name} Product`,
+            // receiver: req.body.participantId, When i sent admin 
+            linkId: product._id,
+            type: 'product',
+            role: 'admin',
+        }
+        const adminNewNotification = await addNotification(adminNotification);
+        // const roomId = 'admin-notification::' + req.body.participantId.toString();
+        const roomId = 'admin-notification';
+        io.emit(roomId, adminNewNotification)
+
 
         return product;
     } else {

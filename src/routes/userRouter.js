@@ -26,12 +26,12 @@ if (!fs.existsSync(UPLOADS_FOLDER_USERS)) {
 router.post('/create-user', createUser);
 router.post('/sign-in', signIn);
 router.post('/verify-email', verifyEmail);
-router.post('/forgot-password', forgotPassword);
-router.post('/fp-verify-code', forgotPasswordVerifyOneTimeCode);
-router.post('/reset-update-password', resetUpdatedPassword);
+router.patch('/forget-password', auth('admin', 'user'), forgotPassword);
+router.patch('/fp-verify-code', auth('admin', 'user'), forgotPasswordVerifyOneTimeCode);
+router.patch('/update-password', auth('admin', 'user'), resetUpdatedPassword);
 
 // change password
-router.post('/change-password', changePassword);
+router.patch('/change-password', auth('admin', 'user'), changePassword);
 
 // Account Upgrade
 router.post('/upgraded-account', auth('user'), upgradedAccount);
