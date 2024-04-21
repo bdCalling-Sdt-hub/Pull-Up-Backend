@@ -1,5 +1,5 @@
 const express = require('express');
-const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount, usersStatistics, changePassword } = require('../controllers/userController');
+const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount, usersStatistics, changePassword, forgotPasswordApp, forgotPasswordVerifyOneTimeCodeApp, resetUpdatedPasswordApp } = require('../controllers/userController');
 const router = express.Router();
 const fs = require('fs');
 const userFileUploadMiddleware = require("../middlewares/fileUpload");
@@ -26,12 +26,17 @@ if (!fs.existsSync(UPLOADS_FOLDER_USERS)) {
 router.post('/create-user', createUser);
 router.post('/sign-in', signIn);
 router.post('/verify-email', verifyEmail);
+// Dashboard
 router.patch('/forget-password', auth('admin', 'user'), forgotPassword);
 router.patch('/fp-verify-code', auth('admin', 'user'), forgotPasswordVerifyOneTimeCode);
 router.patch('/update-password', auth('admin', 'user'), resetUpdatedPassword);
-
 // change password
 router.patch('/change-password', auth('admin', 'user'), changePassword);
+
+// App 
+router.patch('/forgot-password', forgotPasswordApp);
+router.patch('/verify-code', forgotPasswordVerifyOneTimeCodeApp);
+router.patch('/updated-password', resetUpdatedPasswordApp);
 
 // Account Upgrade
 router.post('/upgraded-account', auth('user'), upgradedAccount);

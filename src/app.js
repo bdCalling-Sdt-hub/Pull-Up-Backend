@@ -10,6 +10,7 @@ const termsRouter = require('./routes/termsRouter');
 const aboutRouter = require('./routes/aboutRouter');
 const supportRouter = require('./routes/supportRouter');
 const notificationRouter = require('./routes/notificationRouter');
+const paymentRouter = require('./routes/paymentRouter');
 
 const { notFoundHandler, errorHandler } = require('./middlewares/errorHandler');
 const mongoose = require('mongoose');
@@ -36,17 +37,24 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // Enable CORS
-app.use(cors(
-    {
-        origin: "*",
-        //[
-        //   process.env.ALLOWED_CLIENT_URL_DASHBOARD,
-        //   process.env.ALLOWED_CLIENT_URL_WEB,
-        //   process.env.ALLOWED_CLIENT_URL_SUB_DASHBOARD
-        // ],
-        optionsSuccessStatus: 200
-    }
-));
+// app.use(cors(
+//     {
+//         origin: "http://localhost:5173",
+//         [
+//           process.env.ALLOWED_CLIENT_URL_DASHBOARD,
+//           process.env.ALLOWED_CLIENT_URL_WEB,
+//           process.env.ALLOWED_CLIENT_URL_SUB_DASHBOARD
+//         ],
+//         optionsSuccessStatus: 200
+//     }
+// ));
+
+
+app.use(
+    cors({
+        origin: ["http://localhost:5173"],
+    })
+);
 
 
 //initilizing socketIO
@@ -81,6 +89,7 @@ app.use('/api/terms', termsRouter);
 app.use('/api/about', aboutRouter);
 app.use('/api/support', supportRouter);
 app.use('/api/notifications', notificationRouter);
+app.use('/api/payment', paymentRouter);
 
 //testing API is alive
 app.get('/test', (req, res) => {

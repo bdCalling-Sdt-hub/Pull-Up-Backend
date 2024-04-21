@@ -5,14 +5,13 @@ const User = require('../models/User');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create a Payment
-const addIntentPayment = async (amount, email) => {
-    const { amount } = amount;
+const addIntentPayment = async (body, email) => {
+    const { amount } = body;
     const paymentIntent = await stripe.paymentIntents.create({
-        amount: amount * 100,
+        amount: Number(amount) * 100,
         currency: "usd",
         payment_method_types: ["card"],
     });
-
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -21,13 +20,13 @@ const addIntentPayment = async (amount, email) => {
 
 
     const createdPayment = await Payment.create({
-        paymentIntent,
+        paymentData: paymentIntent,
         userId: user._id,
     });
 
     createdPayment.save();
 
-    return paymentIntent?.client_secret;
+    return { clientSecret: paymentIntent?.client_secret };
 };
 
 module.exports = {

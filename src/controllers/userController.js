@@ -3,7 +3,7 @@ const response = require("../helpers/response");
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const unlinkImage = require('../common/image/unlinkImage')
-const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword, upgradeAccount, updatedAccount, getUsersStatistics, getChangePassword } = require('../services/userService')
+const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword, upgradeAccount, updatedAccount, getUsersStatistics, getChangePassword, forgetPasswordApp, forgetPasswordVerifyOneTimeCodeApp, resetUpdatePasswordApp } = require('../services/userService')
 const User = require('../models/User');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
@@ -13,7 +13,7 @@ const catchAsync = require('../utils/catchAsync');
 const createUser = catchAsync(async (req, res) => {
     const result = await addUser(req.body);
 
-    sendResponse(res, { statusCode: 201, data: result, message: 'User Create Successfully', success: true });
+    sendResponse(res, { statusCode: 201, data: result, message: 'an otp sent to your email.', success: true });
 });
 
 //Sign in
@@ -26,13 +26,14 @@ const signIn = catchAsync(async (req, res) => {
 const verifyEmail = catchAsync(async (req, res) => {
     const result = await emailVerification(req.body)
 
-    sendResponse(res, { statusCode: 200, data: result, message: 'Email Verify Successfully', success: true });
+    sendResponse(res, { statusCode: 200, data: result, message: 'Email Verified Successfully', success: true });
 });
 
 
 // Verify Email
 const forgotPassword = catchAsync(async (req, res) => {
-    const result = await forgetPassword(req.user.email);
+    const email = req?.body?.email ?? req?.user?.email
+    const result = await forgetPassword(email);
 
     sendResponse(res, { statusCode: 200, data: result, message: 'Sent One Time Code successfully', success: true });
 });
@@ -40,7 +41,7 @@ const forgotPassword = catchAsync(async (req, res) => {
 
 // Forget Password Verify One time Code successfully
 const forgotPasswordVerifyOneTimeCode = catchAsync(async (req, res) => {
-    const result = await forgetPasswordVerifyOneTimeCode(req.body, req.user.email)
+    const result = await forgetPasswordVerifyOneTimeCode(req.body, req?.user?.email ?? req?.body?.email)
 
     sendResponse(res, { statusCode: 200, data: result, message: 'User verified successfully', success: true });
 });
@@ -48,10 +49,34 @@ const forgotPasswordVerifyOneTimeCode = catchAsync(async (req, res) => {
 
 // Forget Password Verify One time Code successfully
 const resetUpdatedPassword = catchAsync(async (req, res) => {
-    const result = await resetUpdatePassword(req.body, req.user.email)
+    const result = await resetUpdatePassword(req.body, req?.user?.email ?? req?.body?.email)
+
 
     sendResponse(res, { statusCode: 200, data: result, message: 'Password updated successfully', success: true });
 });
+
+
+// Forget password for app
+const forgotPasswordApp = catchAsync(async (req, res) => {
+    // const email = req?.body?.email ?? req?.user?.email
+    const result = await forgetPasswordApp(req?.body);
+
+    sendResponse(res, { statusCode: 200, data: result, message: 'Sent One Time Code successfully', success: true });
+});
+
+// Forget Password Verify One time Code successfully for app
+const forgotPasswordVerifyOneTimeCodeApp = catchAsync(async (req, res) => {
+    const result = await forgetPasswordVerifyOneTimeCodeApp(req.body)
+
+    sendResponse(res, { statusCode: 200, data: result, message: 'User verified successfully', success: true });
+});
+
+// Forget Password Verify One time Code successfully
+const resetUpdatedPasswordApp = catchAsync(async (req, res) => {
+    const result = await resetUpdatePasswordApp(req.body)
+    sendResponse(res, { statusCode: 200, data: result, message: 'Password updated successfully', success: true });
+});
+
 
 
 // Upgrade Account
@@ -63,7 +88,7 @@ const upgradedAccount = catchAsync(async (req, res) => {
 // Update account
 const updateAccount = catchAsync(async (req, res) => {
     const file = req.file;
-    const result = await updatedAccount(req.body, req.user.email, file);
+    const result = await updatedAccount(req.body, req.user.email, file, req.ip);
     sendResponse(res, { statusCode: 200, data: result, message: "User updated successfully", success: true });
 })
 
@@ -99,4 +124,21 @@ const changePassword = catchAsync(async (req, res) => {
 })
 
 
-module.exports = { signIn, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, allUsers, usersStatistics, updateAccount, updateProfile, singleUser, changePassword }
+module.exports = {
+    signIn,
+    createUser,
+    verifyEmail,
+    forgotPassword,
+    forgotPasswordApp,
+    forgotPasswordVerifyOneTimeCode,
+    forgotPasswordVerifyOneTimeCodeApp,
+    resetUpdatedPassword,
+    resetUpdatedPasswordApp,
+    upgradedAccount,
+    allUsers,
+    usersStatistics,
+    updateAccount,
+    updateProfile,
+    singleUser,
+    changePassword
+}

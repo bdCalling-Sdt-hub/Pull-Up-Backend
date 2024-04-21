@@ -55,6 +55,7 @@ const userSchema = new mongoose.Schema({
     expirationDate: { type: Date },
 
     averageRating: { type: Number },
+    stripeConnectAccountId: { type: String, required: false },
 }, { timestamps: true }, {
     toJSON: {
         transform(doc, ret) {

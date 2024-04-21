@@ -9,6 +9,9 @@ const dayjs = require('dayjs');
 const Package = require('../models/Package');
 const unlinkImage = require('../common/image/unlinkImage');
 const moment = require('moment');
+const fs = require('fs');
+
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Define a map to store user timers for sign up requests
 const userTimers = new Map();
@@ -23,7 +26,8 @@ const addUser = async (userBody) => {
     throw new AppError(httpStatus.CONFLICT, "User already exists! Please login")
   }
 
-  const oneTimeCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+  const oneTimeCode = Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
+
 
   // Create the user in the database
   const user = await User.create({
@@ -99,17 +103,21 @@ const userSignIn = async (userBody) => {
 // Verify Email
 const emailVerification = async (userBody) => {
   const { oneTimeCode, email } = userBody;
+  console.log(userBody)
   const user = await User.findOne({ email: email });
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, "User Not Found")
-  } else if (user.oneTimeCode === oneTimeCode) {
-    user.emailVerified = true;
-    // if (user.role === 'user') {
-    //   user.role = 'user';
-    // }
-    await user.save();
-    return user;
   }
+
+  if (user?.oneTimeCode !== oneTimeCode) {
+    throw new AppError(httpStatus.FORBIDDEN, "otp did not match")
+  }
+  const result = await User.findByIdAndUpdate(user?._id, {
+    $set: {
+      emailVerified: true
+    }
+  })
+  return result;
 }
 
 // Forgot Password
@@ -122,7 +130,7 @@ const forgetPassword = async (email) => {
   }
 
   // Generate OTC (One-Time Code)
-  const oneTimeCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+  const oneTimeCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 10000;
 
   // Store the OTC and its expiration time in the database
   user.oneTimeCode = oneTimeCode;
@@ -164,21 +172,26 @@ const forgetPassword = async (email) => {
 
 // Forgot Password Verify One Time Code
 const forgetPasswordVerifyOneTimeCode = async (userBody, email) => {
-  const {  oneTimeCode } = userBody;
+  const { oneTimeCode } = userBody;
+  console.log(oneTimeCode);
   const user = await User.findOne({ email });
+  console.log(user)
   if (!user) {
-    throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
-  } else if (user.oneTimeCode === oneTimeCode) {
-    user.emailVerified = true;
-    await user.save();
-    return user;
-  } else {
-    throw new AppError(httpStatus.UNAUTHORIZED, 'Failed to verify user');
+    throw new AppError(400, "user not found!")
   }
+  if (oneTimeCode !== user?.oneTimeCode) {
+    throw new AppError(400, "otp did not match")
+  }
+  const result = await User.findByIdAndUpdate(user?._id, {
+    $set: {
+      emailVerified: true,
+    }
+  }, { new: true })
+  return result
 }
 
 // Reset update password
-const resetUpdatePassword = async (userBody,email) => {
+const resetUpdatePassword = async (userBody, email) => {
   const { password } = userBody;
   const user = await User.findOne({ email });
   if (!user) {
@@ -189,6 +202,92 @@ const resetUpdatePassword = async (userBody,email) => {
     return user;
   }
 }
+
+
+// Forget password for app
+const forgetPasswordApp = async (userBody) => {
+  const { email } = userBody;
+  // Check if the user already exists
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "User Not Found")
+  }
+
+  // Generate OTC (One-Time Code)
+  const oneTimeCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 10000;
+
+  // Store the OTC and its expiration time in the database
+  user.oneTimeCode = oneTimeCode;
+  await user.save();
+
+  // Prepare email for password reset
+  const emailData = {
+    email,
+    subject: 'Password Reset Email',
+    html: `
+        <h1>Hello, ${user.name}</h1>
+        <p>Your One Time Code is <h3>${oneTimeCode}</h3> to reset your password</p>
+        <small>This Code is valid for 3 minutes</small>
+      `
+  }
+
+  // Send email
+  try {
+    await emailWithNodemailer(emailData);
+  } catch (emailError) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Failed to send verification email")
+  }
+
+  // Set a timeout to update the oneTimeCode to null after 1 minute
+  setTimeout(async () => {
+    try {
+      user.oneTimeCode = null;
+      await user.save();
+      console.log('oneTimeCode reset to null after 3 minute');
+    } catch (error) {
+      console.error('Error updating oneTimeCode:', error);
+    }
+  }, 180000); // 3 minute in milliseconds
+
+  // res.status(201).json({ message: 'Sent One Time Code successfully' });
+  return user;
+
+}
+
+// Forgot Password Verify One Time Code for App
+const forgetPasswordVerifyOneTimeCodeApp = async (userBody) => {
+  const { email, oneTimeCode } = userBody;
+  console.log(oneTimeCode);
+  const user = await User.findOne({ email });
+  console.log(user)
+  if (!user) {
+    throw new AppError(400, "user not found!")
+  }
+  if (oneTimeCode !== user?.oneTimeCode) {
+    throw new AppError(400, "otp did not match")
+  }
+  const result = await User.findByIdAndUpdate(user?._id, {
+    $set: {
+      emailVerified: true,
+    }
+  }, { new: true })
+  return result
+}
+
+// Reset update password for app
+const resetUpdatePasswordApp = async (userBody) => {
+  const { email, password } = userBody;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
+  } else {
+    user.password = password;
+    await user.save();
+    return user;
+  }
+}
+
+
 
 // Upgrade Account
 const upgradeAccount = async (userBody, loginId) => {
@@ -240,14 +339,16 @@ const upgradeAccount = async (userBody, loginId) => {
 }
 
 // update account
-const updatedAccount = async (userBody, loginEmail, file) => {
-  const { businessName, businessNumber, businessEmail, businessDescription, businessWebsite, businessHours, businessLocation, name, phoneNumber, email, organisationName, organisationNumber, organisationEmail, organisationDescription, organisationWebsite, organisationLocation } = userBody;
+const updatedAccount = async (userBody, loginEmail, file, ip) => {
+  const { dateOfBirth, businessName, businessNumber, businessEmail, businessDescription, businessWebsite, businessHours, businessLocation, name, phoneNumber, email, organisationName, organisationNumber, organisationEmail, organisationDescription, organisationWebsite, organisationLocation } = userBody;
 
   const user = await User.findOne({ email: loginEmail });
 
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, "User not Found");
   }
+
+
 
   if (user.accountType === 'business') {
     user.businessName = businessName;
@@ -257,6 +358,116 @@ const updatedAccount = async (userBody, loginEmail, file) => {
     user.businessWebsite = businessWebsite;
     user.businessHours = businessHours;
     user.location = !businessLocation ? user.location : businessLocation;
+
+
+    const dateComponents = dateOfBirth.split("/");
+    const day = parseInt(dateComponents[0]);
+    const month = parseInt(dateComponents[1]);
+    const year = parseInt(dateComponents[2]);
+
+    const fileUpload = await stripe.files.create({
+      purpose: 'identity_document',
+      file: {
+        data: fs.readFileSync(file.path),
+        name: file.filename, // Replace with the actual file name
+        type: file.mimetype, // Replace with the actual file type
+      },
+    });
+
+    const backFileUpload = await stripe.files.create({
+      purpose: 'identity_document',
+      file: {
+        data: fs.readFileSync(file.path),
+        name: file.filename, // Replace with the actual file name
+        type: file.mimetype, // Replace with the actual file type
+      },
+    });
+
+    const frontFileId = fileUpload.id;
+    const backFileId = backFileUpload.id;
+
+    const account = await stripe.accounts.create({
+      type: 'custom',
+      country: 'US',
+      email: businessEmail,
+      business_type: 'individual',
+      capabilities: {
+        card_payments: {
+          requested: true,
+        },
+        transfers: {
+          requested: true,
+        },
+      },
+      business_profile: {
+        mcc: '7512',
+        name: businessName,
+        product_description: businessDescription,
+        support_address: {
+          city: 'New York',
+          country: 'US',
+          line1: businessLocation,
+          postal_code: '10001',
+          state: 'NY',
+        },
+      },
+      company: {
+        address: {
+          city: 'New York',
+          country: 'US',
+          line1: businessLocation,
+          postal_code: '10001',
+          state: 'NY',
+        },
+      },
+      individual: {
+        dob: {
+          day: day,
+          month: month,
+          year: year,
+        },
+        email: user.email,
+        first_name: user.name,
+        last_name: ' ',
+        id_number: '888867530',
+        phone: '8888675309',
+        address: {
+          city: 'New York',
+          country: 'US',
+          line1: businessLocation,
+          postal_code: '10001',
+          state: 'NY',
+        },
+        verification: {
+          document: {
+            front: frontFileId, // Replace with the actual file path
+            back: backFileId, // Replace with the actual file path
+          },
+        },
+      },
+      tos_acceptance: {
+        // service_agreement: 'recipient',   // MX er somoy ata off thakbe
+        ip: ip,
+        date: Math.floor(new Date().getTime() / 1000)
+      },
+      external_account: {
+        object: 'bank_account',
+        country: 'US',
+        currency: 'usd',
+        account_holder_name: user.name,
+        account_holder_type: 'individual',
+        routing_number: "110000000",
+        account_number: '000123456789',
+      },
+    });
+
+
+    console.log("Account----->", account.id)
+
+    user.stripeConnectAccountId = account.id;
+
+
+
   } else if (user.accountType === 'shopping') {
     user.name = !name ? user.name : name;
     user.phoneNumber = !phoneNumber ? user.phoneNumber : phoneNumber;
@@ -268,6 +479,110 @@ const updatedAccount = async (userBody, loginEmail, file) => {
     user.organisationDescription = organisationDescription;
     user.organisationWebsite = organisationWebsite;
     user.location = !organisationLocation ? user.location : organisationLocation;
+
+
+    const dateComponents = dateOfBirth.split("/");
+    const day = parseInt(dateComponents[0]);
+    const month = parseInt(dateComponents[1]);
+    const year = parseInt(dateComponents[2]);
+
+    const fileUpload = await stripe.files.create({
+      purpose: 'identity_document',
+      file: {
+        data: fs.readFileSync(file.path),
+        name: file.filename, // Replace with the actual file name
+        type: file.mimetype, // Replace with the actual file type
+      },
+    });
+
+    const backFileUpload = await stripe.files.create({
+      purpose: 'identity_document',
+      file: {
+        data: fs.readFileSync(file.path),
+        name: file.filename, // Replace with the actual file name
+        type: file.mimetype, // Replace with the actual file type
+      },
+    });
+
+    const frontFileId = fileUpload.id;
+    const backFileId = backFileUpload.id;
+
+    const account = await stripe.accounts.create({
+      type: 'custom',
+      country: 'US',
+      email: organisationEmail,
+      business_type: 'individual',
+      capabilities: {
+        card_payments: {
+          requested: true,
+        },
+        transfers: {
+          requested: true,
+        },
+      },
+      business_profile: {
+        mcc: '7512',
+        name: organisationName,
+        product_description: organisationDescription,
+        support_address: {
+          city: 'New York',
+          country: 'US',
+          line1: organisationLocation,
+          postal_code: '10001',
+          state: 'NY',
+        },
+      },
+      company: {
+        address: {
+          city: 'New York',
+          country: 'US',
+          line1: organisationLocation,
+          postal_code: '10001',
+          state: 'NY',
+        },
+      },
+      individual: {
+        dob: {
+          day: day,
+          month: month,
+          year: year,
+        },
+        email: user.email,
+        first_name: user.name,
+        last_name: ' ',
+        id_number: '888867530',
+        phone: '8888675309',
+        address: {
+          city: 'New York',
+          country: 'US',
+          line1: organisationLocation,
+          postal_code: '10001',
+          state: 'NY',
+        },
+        verification: {
+          document: {
+            front: frontFileId, // Replace with the actual file path
+            back: backFileId, // Replace with the actual file path
+          },
+        },
+      },
+      tos_acceptance: {
+        // service_agreement: 'recipient',   // MX er somoy ata off thakbe
+        ip: ip,
+        date: Math.floor(new Date().getTime() / 1000)
+      },
+      external_account: {
+        object: 'bank_account',
+        country: 'US',
+        currency: 'usd',
+        account_holder_name: user.name,
+        account_holder_type: 'individual',
+        routing_number: "110000000",
+        account_number: '000123456789',
+      },
+    });
+
+    user.stripeConnectAccountId = account.id;
   } else {
     throw new AppError(httpStatus.METHOD_NOT_ALLOWED, 'Invalid Account type')
   }
@@ -288,6 +603,7 @@ const updatedAccount = async (userBody, loginEmail, file) => {
 
   const updatedUser = await user.save();
   return updatedUser;
+
 }
 
 // All Users
@@ -419,8 +735,11 @@ module.exports = {
   userSignIn,
   emailVerification,
   forgetPassword,
+  forgetPasswordApp,
   forgetPasswordVerifyOneTimeCode,
+  forgetPasswordVerifyOneTimeCodeApp,
   resetUpdatePassword,
+  resetUpdatePasswordApp,
   upgradeAccount,
   updatedAccount,
   getAllUsers,
