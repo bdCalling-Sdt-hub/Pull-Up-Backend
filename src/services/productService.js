@@ -22,7 +22,7 @@ const addProduct = async (userBody, email, file) => {
     if (file) {
         imageUrl = {
             publicFileUrl: `${process.env.IMAGE_UPLOAD_BACKEND_DOMAIN}/uploads/product/${file?.filename}`,
-            path: `public/uploads/product/${file.filename}`
+            path: `uploads/product/${file.filename}`
         }
     }
 
@@ -34,7 +34,8 @@ const addProduct = async (userBody, email, file) => {
             price,
             keywords,
             image: imageUrl,
-            userId: user._id
+            userId: user._id,
+            address: user.location
         });
 
 
@@ -71,12 +72,13 @@ const getAllProducts = async (query) => {
 }
 
 const getSingleProduct = async (id) => {
+    console.log(id)
     const result = await Product.findById(id)
     return result
 }
 
 const nerByProduct = async (query) => {
-    const { longitude, latitude } = query;
+    const { longitude, latitude, accountType } = query;
 
     if (!query) {
         throw new AppError(httpStatus.NOT_FOUND, 'Params not found');
@@ -93,9 +95,15 @@ const nerByProduct = async (query) => {
                 // includeLocs: "dist.location",
                 spherical: true
             }
+        },
+        {
+            $match: {
+                accountType: accountType
+            }
         }
     ]);
 
+    console.log(neaByProduct)
     return neaByProduct;
 }
 

@@ -19,7 +19,7 @@ const addEvent = async (userBody, email, file) => {
     if (file) {
         imageUrl = {
             publicFileUrl: `${process.env.IMAGE_UPLOAD_BACKEND_DOMAIN}/uploads/product/${file?.filename}`,
-            path: `public/uploads/product/${file.filename}`
+            path: `uploads/product/${file.filename}`
         }
     }
 

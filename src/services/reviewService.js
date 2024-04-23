@@ -61,7 +61,9 @@ const createAndUpdateReview = async (body, productId, userId) => {
     // Calculate average rating
     const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
     loginUser.averageRating = averageRating;
+    product.averageRating = averageRating;
     await loginUser.save();
+    await product.save();
 
     return review
 }

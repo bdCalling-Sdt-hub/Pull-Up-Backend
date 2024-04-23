@@ -24,8 +24,9 @@ router.get('/', allProduct);
 router.get('/near-product', nerByProducts);
 router.get('/keywords', findKeyword);
 // Shops
-router.get('/shops', auth('admin'), findShops);
+router.get('/shops', auth('admin', 'user'), findShops);
+router.get('/single/:id', singleProduct);
 router.get('/:id', singleShop);
-router.get('/:id', singleProduct);
+
 
 module.exports = router;

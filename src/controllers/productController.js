@@ -18,6 +18,7 @@ const allProduct = catchAsync(async (req, res) => {
 });
 
 const singleProduct = catchAsync(async (req, res) => {
+    console.log(req.params.id)
     const result = await getSingleProduct(req.params.id)
     sendResponse(res, { statusCode: 200, data: result, message: 'User Retrieve successfully', success: true })
 })

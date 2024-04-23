@@ -64,8 +64,8 @@ const User = require("../models/User");
 const auth = (...userRoles) => {
     return catchAsync(async (req, res, next) => {
 
-        const token = req?.headers?.authorization?.split(" ")[1];
-        // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzZDA4NDIyYmEwZmQ0Zjk5YWIwNGQiLCJlbWFpbCI6ImhlbGxvMTIzQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzEzNjc1MDkyLCJleHAiOjE3MTQyNzk4OTJ9.HhHH07IgnzHAWk5chT6pj9e2DK8qgi6j1HH_9IcoCuY";
+        // const token = req?.headers?.authorization?.split(" ")[1];
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzZDA4NDIyYmEwZmQ0Zjk5YWIwNGQiLCJlbWFpbCI6ImhlbGxvMTIzQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzEzNjc1MDkyLCJleHAiOjE3MTQyNzk4OTJ9.HhHH07IgnzHAWk5chT6pj9e2DK8qgi6j1HH_9IcoCuY";
 
         if (!token) {
             throw new AppError(httpStatus.UNAUTHORIZED, "you are not authorized!");

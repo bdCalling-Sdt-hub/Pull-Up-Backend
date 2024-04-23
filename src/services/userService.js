@@ -89,6 +89,9 @@ const userSignIn = async (userBody) => {
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, "User Not Found")
   }
+  if (user.emailVerified === false) {
+    throw new AppError(httpStatus.NOT_ACCEPTABLE, "Email not verified")
+  }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     throw new AppError(httpStatus.UNAUTHORIZED, "Password Doesn't Match")
@@ -292,13 +295,14 @@ const resetUpdatePasswordApp = async (userBody) => {
 // Upgrade Account
 const upgradeAccount = async (userBody, loginId) => {
   const { accountType, location, packageDuration, activationDate, mapLocation } = userBody;
+  const mLocation = JSON.parse(mapLocation)
   const user = await User.findOne({ _id: loginId });
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
   }
 
-  const coordinates = Object.values(mapLocation)
-  const mapLocationData = { ...mapLocation, coordinates }
+  const coordinates = Object.values(mLocation)
+  const mapLocationData = { ...mLocation, coordinates }
 
   user.accountType = accountType;
   user.location = location;

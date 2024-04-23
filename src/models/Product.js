@@ -14,6 +14,8 @@ const productSchema = new mongoose.Schema({
     },
     keywords: [],
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    address: { type: String },
+    averageRating: { type: Number }
 }, { timestamps: true }, {
     toJSON: {
         transform(doc, ret) {

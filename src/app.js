@@ -39,12 +39,12 @@ app.use(express.urlencoded({ extended: true }));
 // Enable CORS
 // app.use(cors(
 //     {
-//         origin: "http://localhost:5173",
-//         [
-//           process.env.ALLOWED_CLIENT_URL_DASHBOARD,
-//           process.env.ALLOWED_CLIENT_URL_WEB,
-//           process.env.ALLOWED_CLIENT_URL_SUB_DASHBOARD
-//         ],
+//         origin: "*",
+//         // [
+//         //   process.env.ALLOWED_CLIENT_URL_DASHBOARD,
+//         //   process.env.ALLOWED_CLIENT_URL_WEB,
+//         //   process.env.ALLOWED_CLIENT_URL_SUB_DASHBOARD
+//         // ],
 //         optionsSuccessStatus: 200
 //     }
 // ));
