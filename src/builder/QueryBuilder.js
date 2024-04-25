@@ -27,7 +27,6 @@ class QueryBuilder {
         const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
         // Removing unnecessary elements from the copiedQueryObject list
         excludeFields.forEach((element) => delete copiedQueryObject[element]);
-        console.log(copiedQueryObject)
         this.modelQuery = this.modelQuery.find(copiedQueryObject);
         return this;
     }
@@ -41,7 +40,7 @@ class QueryBuilder {
     //pagination
     paginate() {
         const page = Number(this?.query?.page) || 1;
-        const limit = Number(this?.query?.limit) || 10;
+        const limit = Number(this?.query?.limit) || 10000;
         const skip = (page - 1) * limit;
         this.modelQuery = this.modelQuery.skip(skip).limit(limit);
         return this;

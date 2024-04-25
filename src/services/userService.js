@@ -210,6 +210,7 @@ const resetUpdatePassword = async (userBody, email) => {
 // Forget password for app
 const forgetPasswordApp = async (userBody) => {
   const { email } = userBody;
+  console.log(email)
   // Check if the user already exists
   const user = await User.findOne({ email });
   if (!user) {
@@ -364,7 +365,7 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
     user.location = !businessLocation ? user.location : businessLocation;
 
 
-    const dateComponents = dateOfBirth.split("/");
+    const dateComponents = dateOfBirth?.split("/");
     const day = parseInt(dateComponents[0]);
     const month = parseInt(dateComponents[1]);
     const year = parseInt(dateComponents[2]);
@@ -624,49 +625,80 @@ const getAllUsers = async (query) => {
   return { result, meta };
 }
 
-// Users Statistics
 const getUsersStatistics = async (query) => {
-  const userModel = new QueryBuilder(User.find(), query)
-    .search()
-    .filter()
-    .paginate()
-    .sort()
-    .fields();
+  const { year, month } = query;
 
-  const result = await userModel.modelQuery;
+  // Construct the start and end dates for the specified month and year
+  const startDate = new Date(year, month - 1, 1); // Month is zero-based, so we subtract 1
+  const endDate = new Date(year, month, 0); // Get the last day of the specified month
 
-  const statistics = {};
-
-  result.forEach(user => {
-    const createdAt = moment(user.createdAt);
-    const year = createdAt.year();
-    const month = createdAt.month() + 1; // Months are zero-based
-    const day = createdAt.date();
-    const accountType = user.accountType;
-
-    // Check if accountType is defined and not null
-    if (accountType !== undefined && accountType !== null) {
-      // Create keys if not exist
-      if (!statistics[year]) {
-        statistics[year] = {};
+  try {
+    // Aggregate to get users within the specified date range
+    const result = await User.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
       }
-      if (!statistics[year][month]) {
-        statistics[year][month] = {};
-      }
-      if (!statistics[year][month][day]) {
-        statistics[year][month][day] = {};
-      }
-      if (!statistics[year][month][day][accountType]) {
-        statistics[year][month][day][accountType] = 0;
-      }
+    ]);
 
-      // Increment count for accountType
-      statistics[year][month][day][accountType]++;
-    }
-  });
+    // Initialize statistics array with objects for each day of the month
+    const statistics = Array.from({ length: endDate.getDate() }, (_, i) => ({
+      name: (i + 1 < 10 ? '0' : '') + (i + 1),
+      shopping: 0,
+      business: 0,
+      organisation: 0,
+      amt: 0,
+    }));
 
-  return statistics;
+    // Update statistics based on retrieved users
+    result.forEach(user => {
+      const createdAt = moment(user.createdAt);
+      const day = createdAt.date();
+      const accountType = user.accountType;
+
+      // Increment count for accountType if it's not null
+      if (accountType) {
+        const index = day - 1; // Index starts from 0
+        statistics[index][accountType]++; // Increment count for the account type
+        statistics[index].amt++; // Increment total count for the day
+      } else {
+        // If accountType is null, set the count to 0
+        const index = day - 1; // Index starts from 0
+        statistics[index].amt++; // Increment total count for the day
+      }
+    });
+
+    return statistics;
+  } catch (error) {
+    console.error("Error retrieving users:", error);
+    throw error;
+  }
 }
+
+// Usage
+(async () => {
+  try {
+    const statistics = await getUsersStatistics({ year: 2024, month: 1 });
+  } catch (error) {
+    console.error("Error:", error);
+  }
+})();
+
+
+// Usage
+(async () => {
+  try {
+    const statistics = await getUsersStatistics({ year: 2024, month: 1 });
+  } catch (error) {
+    console.error("Error:", error);
+  }
+})();
+
+
 
 // Update User
 const updateUser = async (userBody, file) => {

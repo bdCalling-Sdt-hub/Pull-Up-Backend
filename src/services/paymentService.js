@@ -7,12 +7,12 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create a Payment
 const addIntentPayment = async (body, email) => {
-    const { amount } = body;
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount: Number(amount) * 100,
-        currency: "usd",
-        payment_method_types: ["card"],
-    });
+
+    // const paymentIntent = await stripe.paymentIntents.create({
+    //     amount: Number(amount) * 100,
+    //     currency: "usd",
+    //     payment_method_types: ["card"],
+    // });
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -21,13 +21,13 @@ const addIntentPayment = async (body, email) => {
 
 
     const createdPayment = await Payment.create({
-        paymentData: paymentIntent,
+        paymentData: body,
         userId: user._id,
     });
 
     createdPayment.save();
 
-    return { clientSecret: paymentIntent?.client_secret };
+    return body;
 };
 
 const addConnectIntentPayment = async (body, email) => {

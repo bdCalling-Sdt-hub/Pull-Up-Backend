@@ -72,7 +72,6 @@ const getAllProducts = async (query) => {
 }
 
 const getSingleProduct = async (id) => {
-    console.log(id)
     const result = await Product.findById(id)
     return result
 }
@@ -103,7 +102,6 @@ const nerByProduct = async (query) => {
         }
     ]);
 
-    console.log(neaByProduct)
     return neaByProduct;
 }
 

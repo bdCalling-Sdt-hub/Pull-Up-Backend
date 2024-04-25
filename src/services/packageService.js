@@ -22,7 +22,6 @@ const addPackage = async (userBody, email) => {
 }
 
 const addPackagePrice = async (id, body) => {
-    console.log(id, body);
     const result = await Package.findByIdAndUpdate(id, body, { new: true });
     return result;
 }
