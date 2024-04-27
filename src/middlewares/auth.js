@@ -76,7 +76,7 @@ const auth = (...userRoles) => {
         }
         const { role, userId, email } = decode;
         // const isUserExist = User.isUserExist(email);
-        const isIdExit = User.findById(userId);
+        const isIdExit = await User.findById(userId);
         // if (!isUserExist) {
         //     throw new AppError(httpStatus.NOT_FOUND, "user not found");
         // }

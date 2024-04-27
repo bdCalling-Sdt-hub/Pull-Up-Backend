@@ -705,6 +705,8 @@ const updateUser = async (userBody, file) => {
 
   const { name, phoneNumber, email } = userBody;
 
+  console.log("userBody", userBody)
+
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -730,6 +732,16 @@ const updateUser = async (userBody, file) => {
 
   const updatedUser = await user.save();
   return updatedUser;
+}
+
+const getUserProfile = async (email) => {
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  return user;
 }
 
 const getSingleUser = async (id) => {
@@ -766,6 +778,7 @@ const getChangePassword = async (body, email) => {
 
 
 
+
 module.exports = {
   addUser,
   userSignIn,
@@ -781,6 +794,7 @@ module.exports = {
   getAllUsers,
   getUsersStatistics,
   updateUser,
+  getUserProfile,
   getSingleUser,
   getChangePassword
 }

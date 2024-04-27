@@ -3,7 +3,7 @@ const response = require("../helpers/response");
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const unlinkImage = require('../common/image/unlinkImage')
-const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword, upgradeAccount, updatedAccount, getUsersStatistics, getChangePassword, forgetPasswordApp, forgetPasswordVerifyOneTimeCodeApp, resetUpdatePasswordApp } = require('../services/userService')
+const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword, upgradeAccount, updatedAccount, getUsersStatistics, getChangePassword, forgetPasswordApp, forgetPasswordVerifyOneTimeCodeApp, resetUpdatePasswordApp, getUserProfile } = require('../services/userService')
 const User = require('../models/User');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
@@ -112,6 +112,13 @@ const updateProfile = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, data: result, message: 'User Update successfully', success: true })
 });
 
+// get Profile
+const getProfile = catchAsync(async (req, res) => {
+    console.log(req.user)
+    const result = await getUserProfile(req.user.email)
+    sendResponse(res, { statusCode: 200, data: result, message: 'Users Retrieve successfully', success: true })
+});
+
 
 const singleUser = catchAsync(async (req, res) => {
     const result = await getSingleUser(req.params.id)
@@ -139,6 +146,7 @@ module.exports = {
     usersStatistics,
     updateAccount,
     updateProfile,
+    getProfile,
     singleUser,
     changePassword
 }

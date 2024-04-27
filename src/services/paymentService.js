@@ -3,6 +3,7 @@ const AppError = require('../errors/AppError');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const Product = require('../models/Product');
+const QueryBuilder = require('../builder/QueryBuilder');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create a Payment
@@ -19,10 +20,13 @@ const addIntentPayment = async (body, email) => {
         throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
     }
 
+    console.log(user.accountType)
+
 
     const createdPayment = await Payment.create({
         paymentData: body,
         userId: user._id,
+        userAccountType: user.accountType,
     });
 
     createdPayment.save();
@@ -94,7 +98,31 @@ const addConnectIntentPayment = async (body, email) => {
     return { clientSecret: paymentIntent?.client_secret };
 };
 
+const getAllTransactions = async (query, email) => {
+    console.log(query)
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        if (!user) {
+            throw new AppError(httpStatus.UNAUTHORIZED, "User Not Found")
+        }
+    }
+
+    const paymentModel = new QueryBuilder(Payment.find().populate('userId'), await query)
+        .search()
+        .filter()
+        .paginate()
+        .sort()
+        .fields();
+
+    const result = await paymentModel.modelQuery;
+    const meta = await paymentModel.meta();
+
+    return { result, meta }
+}
+
 module.exports = {
     addIntentPayment,
-    addConnectIntentPayment
+    addConnectIntentPayment,
+    getAllTransactions
 }

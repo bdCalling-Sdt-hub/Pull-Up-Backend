@@ -1,5 +1,5 @@
 const express = require('express');
-const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount, usersStatistics, changePassword, forgotPasswordApp, forgotPasswordVerifyOneTimeCodeApp, resetUpdatedPasswordApp } = require('../controllers/userController');
+const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount, usersStatistics, changePassword, forgotPasswordApp, forgotPasswordVerifyOneTimeCodeApp, resetUpdatedPasswordApp, getProfile } = require('../controllers/userController');
 const router = express.Router();
 const fs = require('fs');
 const userFileUploadMiddleware = require("../middlewares/fileUpload");
@@ -45,7 +45,8 @@ router.post('/update-account', auth('user'), [uploadUsers.single("image")], upda
 // User
 router.get('/', auth('admin'), allUsers);
 router.get('/user-statistics', auth('admin'), usersStatistics);
-router.put('/', [uploadUsers.single("image")], updateProfile);
+router.get('/profile', auth('admin', 'user'), getProfile);
+router.patch('/', [uploadUsers.single("image")], updateProfile);
 
 
 router.get('/:id', auth('manager', 'user'), singleUser);
