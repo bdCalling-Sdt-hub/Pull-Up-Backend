@@ -1,6 +1,6 @@
 const express = require('express');
 const auth = require('../middlewares/auth');
-const { createProduct, allProduct, singleProduct, nerByProducts, findKeyword, findShops, singleShop } = require('../controllers/productController');
+const { createProduct, allProduct, singleProduct, nerByProducts, findKeyword, findShops, singleShop, userWiseProduct } = require('../controllers/productController');
 const router = express.Router();
 
 const fs = require('fs');
@@ -21,6 +21,7 @@ if (!fs.existsSync(UPLOADS_FOLDER_USERS)) {
 
 router.post('/create-product', auth('user'), [uploadUsers.single("image")], createProduct);
 router.get('/', allProduct);
+router.get('/user-wise-product', auth('user'), userWiseProduct);
 router.get('/near-product', nerByProducts);
 router.get('/keywords', findKeyword);
 // Shops

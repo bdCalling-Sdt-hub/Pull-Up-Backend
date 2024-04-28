@@ -6,7 +6,7 @@ const Event = require('../models/Event');
 
 // Create a new user
 const addEvent = async (userBody, email, file) => {
-    const { name, description, price, location } = userBody;
+    const { name, description, price, location, date } = userBody;
 
     // Check if the user already exists
     const user = await User.findOne({ email });
@@ -31,7 +31,7 @@ const addEvent = async (userBody, email, file) => {
             price,
             location,
             image: imageUrl,
-            user: user._id
+            userId: user._id
         });
 
         return event;
@@ -53,6 +53,20 @@ const getAllEvents = async (query) => {
     return { result, meta }
 }
 
+const userWiseEvents = async (query) => {
+
+    const productModel = new QueryBuilder(Event.find(), query)
+        .search()
+        .filter()
+        .paginate()
+        .sort()
+        .fields();
+
+    const result = await productModel.modelQuery;
+    const meta = await productModel.meta();
+    return { result, meta }
+}
+
 const getSingleEvent = async (id) => {
     const result = await Event.findById(id)
     return result
@@ -64,5 +78,6 @@ const getSingleEvent = async (id) => {
 module.exports = {
     addEvent,
     getAllEvents,
+    userWiseEvents,
     getSingleEvent
 }

@@ -3,7 +3,7 @@ const response = require("../helpers/response");
 const jwt = require('jsonwebtoken');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
-const { addEvent, getAllEvents, getSingleEvent } = require('../services/eventService');
+const { addEvent, getAllEvents, getSingleEvent, userWiseEvents } = require('../services/eventService');
 
 
 // create a user
@@ -17,10 +17,21 @@ const allEvent = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, data: result, message: 'Event Retrieve successfully', success: true })
 });
 
+const userWiseEvent = catchAsync(async (req, res) => {
+    req.query.userId = req.user.userId
+    const result = await userWiseEvents(req.query);
+    sendResponse(res, { statusCode: 200, data: result, message: 'User Wise Event Retrieve successfully', success: true })
+});
+
 const singleEvent = catchAsync(async (req, res) => {
     const result = await getSingleEvent(req.params.id)
     sendResponse(res, { statusCode: 200, data: result, message: 'Event Retrieve successfully', success: true })
 })
 
 
-module.exports = { createEvent, allEvent, singleEvent }
+module.exports = {
+    createEvent,
+    allEvent,
+    userWiseEvent,
+    singleEvent
+}

@@ -3,7 +3,7 @@ const response = require("../helpers/response");
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const unlinkImage = require('../common/image/unlinkImage')
-const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword, upgradeAccount, updatedAccount, getUsersStatistics, getChangePassword, forgetPasswordApp, forgetPasswordVerifyOneTimeCodeApp, resetUpdatePasswordApp, getUserProfile } = require('../services/userService')
+const { addUser, userSignIn, addManager, getUserByEmail, getAllUsers, getUserById, updateUser, loginWithPasscode, getSingleUser, emailVerification, forgetPassword, forgetPasswordVerifyOneTimeCode, resetUpdatePassword, upgradeAccount, updatedAccount, getUsersStatistics, getChangePassword, forgetPasswordApp, forgetPasswordVerifyOneTimeCodeApp, resetUpdatePasswordApp, getUserProfile, totalIncomeRatio } = require('../services/userService')
 const User = require('../models/User');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
@@ -104,6 +104,12 @@ const usersStatistics = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, data: result, message: 'Users Retrieve successfully', success: true })
 });
 
+// Users Statistics
+const totalIncomeRatios = catchAsync(async (req, res) => {
+    const result = await totalIncomeRatio()
+    sendResponse(res, { statusCode: 200, data: result, message: 'Users Income Ratio successfully', success: true })
+});
+
 // Update Profile
 const updateProfile = catchAsync(async (req, res) => {
     const file = req.file;
@@ -144,6 +150,7 @@ module.exports = {
     upgradedAccount,
     allUsers,
     usersStatistics,
+    totalIncomeRatios,
     updateAccount,
     updateProfile,
     getProfile,

@@ -11,6 +11,7 @@ const aboutRouter = require('./routes/aboutRouter');
 const supportRouter = require('./routes/supportRouter');
 const notificationRouter = require('./routes/notificationRouter');
 const paymentRouter = require('./routes/paymentRouter');
+const favoriteRouter = require('./routes/favoriteRouter');
 
 const { notFoundHandler, errorHandler } = require('./middlewares/errorHandler');
 const mongoose = require('mongoose');
@@ -90,6 +91,7 @@ app.use('/api/about', aboutRouter);
 app.use('/api/support', supportRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/payment', paymentRouter);
+app.use('/api/favorite', favoriteRouter);
 
 //testing API is alive
 app.get('/test', (req, res) => {

@@ -345,6 +345,7 @@ const upgradeAccount = async (userBody, loginId) => {
 
 // update account
 const updatedAccount = async (userBody, loginEmail, file, ip) => {
+  console.log(userBody)
   const { dateOfBirth, businessName, businessNumber, businessEmail, businessDescription, businessWebsite, businessHours, businessLocation, name, phoneNumber, email, organisationName, organisationNumber, organisationEmail, organisationDescription, organisationWebsite, organisationLocation } = userBody;
 
   const user = await User.findOne({ email: loginEmail });
@@ -699,6 +700,37 @@ const getUsersStatistics = async (query) => {
 })();
 
 
+// Wallet pai chart
+const totalIncomeRatio = async () => {
+  const data = await User.find()
+  const monthlyData = data.filter(item => item.packageDuration === "monthly");
+  const weeklyData = data.filter(item => item.packageDuration === "weekly");
+
+  const monthlyFormatted = {
+    name: "Monthly",
+    value: monthlyData.length,
+    color: "#D0A65A"
+  };
+
+  const weeklyFormatted = {
+    name: "Weekly",
+    value: weeklyData.length,
+    color: "#1D1D1F"
+  };
+
+  // Combine the formatted data into an array
+  const formattedData = [monthlyFormatted, weeklyFormatted];
+
+  // Calculate total count
+  const totalCount = monthlyData.length + weeklyData.length;
+
+  // Calculate percentages
+  const weeklyPercent = ((weeklyData.length / totalCount) * 100).toFixed(2);
+  const monthlyPercent = ((monthlyData.length / totalCount) * 100).toFixed(2);
+
+  return { formattedData, weeklyPercent, monthlyPercent };
+};
+
 
 // Update User
 const updateUser = async (userBody, file) => {
@@ -793,6 +825,7 @@ module.exports = {
   updatedAccount,
   getAllUsers,
   getUsersStatistics,
+  totalIncomeRatio,
   updateUser,
   getUserProfile,
   getSingleUser,

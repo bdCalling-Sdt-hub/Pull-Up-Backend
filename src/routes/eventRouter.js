@@ -4,7 +4,7 @@ const router = express.Router();
 
 const fs = require('fs');
 const userFileUploadMiddleware = require("../middlewares/fileUpload");
-const { createEvent, allEvent, singleEvent } = require('../controllers/eventController');
+const { createEvent, allEvent, singleEvent, userWiseEvent } = require('../controllers/eventController');
 const UPLOADS_FOLDER_USERS = "./public/uploads/product";
 const uploadUsers = userFileUploadMiddleware(UPLOADS_FOLDER_USERS);
 
@@ -21,6 +21,7 @@ if (!fs.existsSync(UPLOADS_FOLDER_USERS)) {
 
 router.post('/create-event', auth('user'), [uploadUsers.single("image")], createEvent);
 router.get('/', allEvent);
+router.get('/user-wise-event', auth('user'), userWiseEvent);
 router.get('/:id', singleEvent);
 
 module.exports = router;

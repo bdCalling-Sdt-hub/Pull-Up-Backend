@@ -1,4 +1,4 @@
-const { addIntentPayment, addConnectIntentPayment, getAllTransactions } = require('../services/paymentService');
+const { addIntentPayment, addConnectIntentPayment, getAllTransactions, currentBalances } = require('../services/paymentService');
 const catchAsync = require('../utils/catchAsync');
 const sendResponse = require('../utils/sendResponse');
 
@@ -21,8 +21,14 @@ const getAllTransaction = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, data: result, message: 'All Transactions Successfully', success: true });
 });
 
+const currentBalance = catchAsync(async (req, res) => {
+    const result = await currentBalances(req.query, req.user.email, req.user.userId);
+    sendResponse(res, { statusCode: 200, data: result, message: 'Transactions Successfully', success: true });
+});
+
 module.exports = {
     IntentPayment,
     connectIntentPayment,
-    getAllTransaction
+    getAllTransaction,
+    currentBalance
 }

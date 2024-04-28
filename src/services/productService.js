@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const QueryBuilder = require('../builder/QueryBuilder');
 const { addNotification } = require('./notificationService');
+const Favorite = require('../models/Favorite');
 
 // Create a new user
 const addProduct = async (userBody, email, file) => {
@@ -58,7 +59,44 @@ const addProduct = async (userBody, email, file) => {
     }
 }
 
-const getAllProducts = async (query) => {
+const getAllProducts = async (query, userId) => {
+
+    const productModel = new QueryBuilder(Product.find(), query)
+        .search()
+        .filter()
+        .paginate()
+        .sort()
+        .fields();
+
+    const result = await productModel.modelQuery;
+
+    const allProductIds = result.map(product => product._id);
+    // console.log(allProductIds);
+
+    let favorites = [];
+    if (userId) {
+        favorites = await Favorite.find({ userId, productId: { $in: allProductIds } });
+    }
+
+    // Create a map of product IDs to indicate whether each product is a favorite
+    const favoriteMap = {};
+    favorites.forEach(favorite => {
+        favoriteMap[favorite.productId.toString()] = true;
+    });
+
+    // Add a new field indicating whether each product is in the user's favorite list
+    const productsWithFavorite = result.map(product => {
+        const isFavorite = favoriteMap[product._id.toString()] || false;
+        return { ...product.toObject(), isFavorite };
+    });
+
+    const meta = await productModel.meta();
+    return { result: productsWithFavorite, meta };
+};
+
+
+const userWiseProducts = async (query) => {
+
     const productModel = new QueryBuilder(Product.find(), query)
         .search()
         .filter()
@@ -158,6 +196,7 @@ const getSingleShop = async (id) => {
 module.exports = {
     addProduct,
     getAllProducts,
+    userWiseProducts,
     getSingleProduct,
     nerByProduct,
     findKeywords,

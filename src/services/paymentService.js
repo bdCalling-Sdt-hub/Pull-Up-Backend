@@ -4,6 +4,8 @@ const Payment = require('../models/Payment');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const QueryBuilder = require('../builder/QueryBuilder');
+const { default: mongoose } = require('mongoose');
+const dayjs = require('dayjs');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create a Payment
@@ -121,8 +123,80 @@ const getAllTransactions = async (query, email) => {
     return { result, meta }
 }
 
+const currentBalances = async (query, email, userId) => {
+    const { month, year, date } = query;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "User Not Found");
+    }
+
+    let matchStage = {};
+
+    if (month && year) {
+        const startDate = new Date(`${month} 1, ${year}`);
+        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+
+        console.log(startDate, endDate);
+
+        if (startDate && endDate) {
+            // If startDate and endDate are provided, match by them
+            matchStage = {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(userId),
+                    createdAt: {
+                        $gte: startDate,
+                        $lte: endDate
+                    }
+                }
+            };
+        }
+    } else if (date) {
+        const formattedDate = dayjs(date);
+        const startOfDay = formattedDate.startOf('day').toDate(); // Start of the day
+        const endOfDay = formattedDate.endOf('day').toDate(); // End of the day
+
+        matchStage = {
+            $match: {
+                userId: new mongoose.Types.ObjectId(userId),
+                createdAt: {
+                    $gte: startOfDay,
+                    $lte: endOfDay
+                }
+            }
+        };
+    }
+
+    const aggregationPipeline = [];
+
+    // Add the match stage
+    aggregationPipeline.push(matchStage);
+
+    // Add the $lookup stage properly
+    aggregationPipeline.push({
+        $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'userId'
+        }
+    });
+
+    aggregationPipeline.push({
+        $unwind: '$userId'
+    })
+
+    const result = await Payment.aggregate(aggregationPipeline);
+
+    return result;
+};
+
+
+
+
 module.exports = {
     addIntentPayment,
     addConnectIntentPayment,
-    getAllTransactions
+    getAllTransactions,
+    currentBalances
 }
