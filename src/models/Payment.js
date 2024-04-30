@@ -4,6 +4,7 @@ const paymentSchema = new mongoose.Schema({
     paymentData: { type: Object },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     userAccountType: { type: String },
+    packageDuration: { type: String },
     receiveId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 },
     { timestamps: true },

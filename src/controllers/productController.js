@@ -36,7 +36,7 @@ const nerByProducts = catchAsync(async (req, res) => {
 })
 
 const findKeyword = catchAsync(async (req, res) => {
-    const result = await findKeywords(req.query)
+    const result = await findKeywords(req.query, req.query.searchTerm)
     sendResponse(res, { statusCode: 200, data: result, message: 'Keywords Retrieve successfully', success: true })
 })
 

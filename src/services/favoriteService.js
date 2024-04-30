@@ -43,7 +43,7 @@ const addFavorite = async (email, body) => {
 };
 
 const getAllFavorite = async (query) => {
-    const productModel = new QueryBuilder(Favorite.find(), query)
+    const productModel = new QueryBuilder(Favorite.find().populate('productId'), query)
         .search()
         .filter()
         .paginate()

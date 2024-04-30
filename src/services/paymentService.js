@@ -17,18 +17,21 @@ const addIntentPayment = async (body, email) => {
     //     payment_method_types: ["card"],
     // });
 
+    console.log("Gorom---->", body)
+
     const user = await User.findOne({ email });
     if (!user) {
         throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
     }
 
     console.log(user.accountType)
-
+    console.log(user.packageDuration)
 
     const createdPayment = await Payment.create({
         paymentData: body,
         userId: user._id,
         userAccountType: user.accountType,
+        packageDuration: user.packageDuration ///Naim asle ata app theke patate hobe
     });
 
     createdPayment.save();

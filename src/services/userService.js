@@ -10,6 +10,7 @@ const Package = require('../models/Package');
 const unlinkImage = require('../common/image/unlinkImage');
 const moment = require('moment');
 const fs = require('fs');
+const Payment = require('../models/Payment');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -701,10 +702,30 @@ const getUsersStatistics = async (query) => {
 
 
 // Wallet pai chart
-const totalIncomeRatio = async () => {
-  const data = await User.find()
-  const monthlyData = data.filter(item => item.packageDuration === "monthly");
-  const weeklyData = data.filter(item => item.packageDuration === "weekly");
+const packagePurchaseRatio = async (query) => {
+  const { year, month } = query;
+
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0);
+
+  console.log(startDate, endDate)
+
+  const result = await User.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      }
+    }
+  ]);
+
+
+  // const data = await User.find()
+  const monthlyData = result.filter(item => item.packageDuration === "monthly");
+  const weeklyData = result.filter(item => item.packageDuration === "weekly");
+  const dailyData = result.filter(item => item.packageDuration === "daily");
 
   const monthlyFormatted = {
     name: "Monthly",
@@ -715,21 +736,82 @@ const totalIncomeRatio = async () => {
   const weeklyFormatted = {
     name: "Weekly",
     value: weeklyData.length,
+    color: "#68532D"
+  };
+
+  const dailyFormatted = {
+    name: "Daily",
+    value: dailyData.length,
     color: "#1D1D1F"
   };
 
   // Combine the formatted data into an array
-  const formattedData = [monthlyFormatted, weeklyFormatted];
+  const formattedData = [monthlyFormatted, weeklyFormatted, dailyFormatted];
 
   // Calculate total count
-  const totalCount = monthlyData.length + weeklyData.length;
+  const totalCount = monthlyData.length + weeklyData.length + dailyData.length;
 
   // Calculate percentages
-  const weeklyPercent = ((weeklyData.length / totalCount) * 100).toFixed(2);
-  const monthlyPercent = ((monthlyData.length / totalCount) * 100).toFixed(2);
+  const weeklyPercent = ((weeklyData.length / totalCount) * 100).toFixed(1);
+  const monthlyPercent = ((monthlyData.length / totalCount) * 100).toFixed(1);
+  const dailyDataPercent = ((dailyData.length / totalCount) * 100).toFixed(1);
 
-  return { formattedData, weeklyPercent, monthlyPercent };
+  return { formattedData, weeklyPercent, monthlyPercent, dailyDataPercent };
 };
+
+
+const totalIncomeRatio = async (query) => {
+  const { year } = query;
+
+  // Create an array to store monthly and weekly payments for each month
+  const data = [];
+
+  // Loop through each month of the year
+  for (let month = 1; month <= 12; month++) {
+    const startDate = dayjs(`${year}-${month}-01`).startOf('month').toDate();
+    console.log("Start date of Janury:", startDate);
+    const endDate = dayjs(startDate).endOf('month').toDate();
+
+    console.log(endDate);
+
+    // Query payments within the specified month
+    const result = await Payment.find({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    }).populate('userId');
+
+
+    // Filter payments by package duration
+    const monthlyData = result.filter(item => item?.packageDuration === "monthly");
+    const weeklyData = result.filter(item => item?.packageDuration === "weekly");
+    const dailyData = result.filter(item => item?.packageDuration === "daily");
+
+    console.log(dailyData)
+
+    // Calculate total monthly and weekly payments
+    const monthlyTotal = monthlyData.reduce((total, item) => total + item?.paymentData?.amount, 0);
+    const weeklyTotal = weeklyData.reduce((total, item) => total + item?.paymentData?.amount, 0);
+    const dailyTotal = dailyData.reduce((total, item) => total + item?.paymentData?.amount, 0);
+
+    // Format month name (Jan, Feb, etc.)
+    const monthName = dayjs(startDate).format('MMM');
+
+    // Add monthly and weekly payments for the month to the data array
+    data.push({
+      month: monthName,
+      monthly: monthlyTotal,
+      weekly: weeklyTotal,
+      daily: dailyTotal
+    });
+  }
+
+  return data;
+};
+
+
+
 
 
 // Update User
@@ -825,6 +907,7 @@ module.exports = {
   updatedAccount,
   getAllUsers,
   getUsersStatistics,
+  packagePurchaseRatio,
   totalIncomeRatio,
   updateUser,
   getUserProfile,
