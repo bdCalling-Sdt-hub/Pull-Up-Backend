@@ -3,21 +3,21 @@ const AppError = require('../errors/AppError');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const Product = require('../models/Product');
+const Event = require('../models/Event');
 const QueryBuilder = require('../builder/QueryBuilder');
 const { default: mongoose } = require('mongoose');
 const dayjs = require('dayjs');
+const { addNotification } = require('./notificationService');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create a Payment
-const addIntentPayment = async (body, email) => {
+const addIntentPayment = async (body, email, packageDuration, userAccountType) => {
 
     // const paymentIntent = await stripe.paymentIntents.create({
     //     amount: Number(amount) * 100,
     //     currency: "usd",
     //     payment_method_types: ["card"],
     // });
-
-    console.log("Gorom---->", body)
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -30,8 +30,8 @@ const addIntentPayment = async (body, email) => {
     const createdPayment = await Payment.create({
         paymentData: body,
         userId: user._id,
-        userAccountType: user.accountType,
-        packageDuration: user.packageDuration ///Naim asle ata app theke patate hobe
+        userAccountType: userAccountType,
+        packageDuration: packageDuration
     });
 
     createdPayment.save();
@@ -39,10 +39,11 @@ const addIntentPayment = async (body, email) => {
     return body;
 };
 
-const addConnectIntentPayment = async (body, email) => {
-    const { amount, productId } = body;
-    console.log(productId)
-    const newAmount = Number(amount) * 100
+const addConnectIntentPayment = async (body, email, productId) => {
+
+    console.log(productId, body)
+    const newAmount = body.amount;
+    console.log("newAmount--->", newAmount)
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -61,46 +62,126 @@ const addConnectIntentPayment = async (body, email) => {
         throw new AppError(httpStatus.UNAUTHORIZED, 'Destination ID is not found for payment');
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount: newAmount,
-        currency: "usd",
-        payment_method_types: ["card"],
-    });
+    // const paymentIntent = await stripe.paymentIntents.create({
+    //     amount: newAmount,
+    //     currency: "usd",
+    //     payment_method_types: ["card"],
+    // });
 
 
     const onePercent = newAmount * 0.01;
-    console.log(onePercent); // Output: 1
+    console.log("onePercent---->", onePercent); // Output: 1
 
     const transferAmount = (newAmount - onePercent);
-
-    // Check available balance in Stripe test account
-    // const balance = await stripe.balance.retrieve();
-    // const availableBalance = balance.available[0].amount;
-
-    // if (transferAmount > availableBalance) {
-    //     throw new AppError(httpStatus.UNAUTHORIZED, "Insufficient funds in Stripe test account");
-    // }
+    console.log("transferAmount--->", transferAmount);
 
     const transfer = await stripe.transfers.create({
         amount: transferAmount,
         currency: 'usd',
         // source_transaction: paymentIntent.id,
         destination: stripeConnectAccountID, //stripeConnectAccountID
-        transfer_group: 'ORDER_95',
+        transfer_group: body.id,
     });
 
-    console.log(transfer)
+    console.log("transfer---->", transfer)
 
 
     const createdPayment = await Payment.create({
-        paymentData: paymentIntent,
+        paymentData: body, //paymentIntent == body
         userId: user._id,
-        receiveId: receiveUser._id
+        receiveId: receiveUser._id,
+        productId: productId,
     });
 
     createdPayment.save();
 
-    return { clientSecret: paymentIntent?.client_secret };
+    console.log("Product User Id", receiveUser._id)
+    const userNotification = {
+        message: `${user.name} Bought ${stripeConnectAccount.name}`,
+        // receiver: req.body.participantId, When i sent admin 
+        linkId: stripeConnectAccount._id,
+        receiver: receiveUser._id,
+        type: 'product',
+        role: 'user',
+    }
+    const userNewNotification = await addNotification(userNotification);
+    const roomId = 'user-notification::' + receiveUser._id.toString();
+    // const roomId = 'admin-notification';
+    io.emit(roomId, userNewNotification)
+
+    return { clientSecret: body?.client_secret };
+};
+
+const addConnectIntentPaymentEvent = async (body, email, eventId) => {
+
+    console.log("Event Id", eventId, body)
+    const newAmount = body.amount;
+    console.log("newAmount--->", newAmount)
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
+    }
+
+    const stripeConnectAccount = await Event.findById(eventId);
+    console.log(stripeConnectAccount)
+
+    const receiveUser = await User.findOne({ _id: stripeConnectAccount.userId });
+
+    const stripeConnectAccountID = receiveUser.stripeConnectAccountId;
+    console.log("Destination Id -----", stripeConnectAccountID)
+
+    if (!stripeConnectAccountID) {
+        throw new AppError(httpStatus.UNAUTHORIZED, 'Destination ID is not found for payment');
+    }
+
+    // const paymentIntent = await stripe.paymentIntents.create({
+    //     amount: newAmount,
+    //     currency: "usd",
+    //     payment_method_types: ["card"],
+    // });
+
+
+    const onePercent = newAmount * 0.01;
+    console.log("onePercent---->", onePercent); // Output: 1
+
+    const transferAmount = (newAmount - onePercent);
+    console.log("transferAmount--->", transferAmount);
+
+    const transfer = await stripe.transfers.create({
+        amount: transferAmount,
+        currency: 'usd',
+        // source_transaction: paymentIntent.id,
+        destination: stripeConnectAccountID, //stripeConnectAccountID
+        transfer_group: body.id,
+    });
+
+    console.log("transfer---->", transfer)
+
+
+    const createdPayment = await Payment.create({
+        paymentData: body, //paymentIntent == body
+        userId: user._id,
+        receiveId: receiveUser._id,
+        eventId: eventId
+    });
+
+    createdPayment.save();
+
+    const userNotification = {
+        message: `${user.name} ${stripeConnectAccount.name} bought tickets to the event`,
+        // receiver: req.body.participantId, When i sent admin 
+        linkId: stripeConnectAccount._id,
+        receiver: receiveUser._id,
+        type: 'product',
+        role: 'user',
+    }
+    const userNewNotification = await addNotification(userNotification);
+    const roomId = 'user-notification::' + receiveUser._id.toString();
+    // const roomId = 'admin-notification';
+    io.emit(roomId, userNewNotification)
+
+    return { clientSecret: body?.client_secret };
 };
 
 const getAllTransactions = async (query, email) => {
@@ -127,6 +208,8 @@ const getAllTransactions = async (query, email) => {
 }
 
 const currentBalances = async (query, email, userId) => {
+
+    console.log(userId)
     const { month, year, date } = query;
 
     const user = await User.findOne({ email });
@@ -140,13 +223,11 @@ const currentBalances = async (query, email, userId) => {
         const startDate = new Date(`${month} 1, ${year}`);
         const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
 
-        console.log(startDate, endDate);
-
         if (startDate && endDate) {
             // If startDate and endDate are provided, match by them
             matchStage = {
                 $match: {
-                    userId: new mongoose.Types.ObjectId(userId),
+                    receiveId: new mongoose.Types.ObjectId(userId),
                     createdAt: {
                         $gte: startDate,
                         $lte: endDate
@@ -161,7 +242,7 @@ const currentBalances = async (query, email, userId) => {
 
         matchStage = {
             $match: {
-                userId: new mongoose.Types.ObjectId(userId),
+                receiveId: new mongoose.Types.ObjectId(userId),
                 createdAt: {
                     $gte: startOfDay,
                     $lte: endOfDay
@@ -179,7 +260,7 @@ const currentBalances = async (query, email, userId) => {
     aggregationPipeline.push({
         $lookup: {
             from: 'users',
-            localField: 'userId',
+            localField: 'receiveId',
             foreignField: '_id',
             as: 'userId'
         }
@@ -200,6 +281,7 @@ const currentBalances = async (query, email, userId) => {
 module.exports = {
     addIntentPayment,
     addConnectIntentPayment,
+    addConnectIntentPaymentEvent,
     getAllTransactions,
     currentBalances
 }

@@ -5,6 +5,8 @@ const Product = require('../models/Product');
 const QueryBuilder = require('../builder/QueryBuilder');
 const { addNotification } = require('./notificationService');
 const Favorite = require('../models/Favorite');
+const Payment = require('../models/Payment');
+const { default: mongoose } = require('mongoose');
 
 // Create a new user
 const addProduct = async (userBody, email, file) => {
@@ -114,6 +116,54 @@ const getSingleProduct = async (id) => {
     return result
 }
 
+const getProductHistory = async (userId) => {
+    console.log(userId);
+    const result = await Payment.find({ userId: userId }).populate('userId productId').select('userId productId')
+    return result
+}
+
+const getReceiverProductHistory = async (userId) => {
+    // Find payments where receiveId matches the provided userId
+    const result = await Payment.aggregate([
+        {
+            $match: { receiveId: new mongoose.Types.ObjectId(userId) }
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'receiveId',
+                foreignField: '_id',
+                as: 'receiveId'
+            }
+        },
+        {
+            $unwind: '$receiveId'
+        },
+        {
+            $match: { 'receiveId.accountType': 'business' } // Filter by accountType 'business'
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'productId',
+                foreignField: '_id',
+                as: 'productId'
+            }
+        },
+        {
+            $unwind: '$productId'
+        },
+        {
+            $project: {
+                receiveId: 1,
+                productId: 1
+            }
+        }
+    ]);
+
+    return result
+}
+
 const nerByProduct = async (query) => {
     const { longitude, latitude, accountType } = query;
 
@@ -192,14 +242,33 @@ const getSingleShop = async (id) => {
     return result
 }
 
+const getSingleShopByProduct = async (id) => {
+    // const user = await User.findById(id)
+
+    // if(!user){
+    //     throw new AppError(httpStatus.NOT_FOUND, "User not found")
+    // }
+
+    const product = await Product.find({ userId: id })
+
+    if (!product) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found")
+    }
+
+    return product;
+}
+
 
 module.exports = {
     addProduct,
     getAllProducts,
     userWiseProducts,
     getSingleProduct,
+    getProductHistory,
+    getReceiverProductHistory,
     nerByProduct,
     findKeywords,
     getShopes,
-    getSingleShop
+    getSingleShop,
+    getSingleShopByProduct
 }

@@ -1,6 +1,6 @@
 const express = require('express');
 const auth = require('../middlewares/auth');
-const { createProduct, allProduct, singleProduct, nerByProducts, findKeyword, findShops, singleShop, userWiseProduct } = require('../controllers/productController');
+const { createProduct, allProduct, singleProduct, nerByProducts, findKeyword, findShops, singleShop, userWiseProduct, singleShopByProduct, productHistory, receiverProductHistory } = require('../controllers/productController');
 const router = express.Router();
 
 const fs = require('fs');
@@ -26,7 +26,10 @@ router.get('/near-product', nerByProducts);
 router.get('/keywords', findKeyword);
 // Shops
 router.get('/shops', auth('admin', 'user'), findShops);
+router.get('/product-history', auth('user'), productHistory);
+router.get('/receiver-product-history', auth('user'), receiverProductHistory);
 router.get('/single/:id', singleProduct);
+router.get('/single-shop-by-product/:id', singleShopByProduct);
 router.get('/:id', singleShop);
 
 

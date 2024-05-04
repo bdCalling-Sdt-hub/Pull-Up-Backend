@@ -298,6 +298,7 @@ const resetUpdatePasswordApp = async (userBody) => {
 const upgradeAccount = async (userBody, loginId) => {
   const { accountType, location, packageDuration, activationDate, mapLocation } = userBody;
   const mLocation = JSON.parse(mapLocation)
+
   const user = await User.findOne({ _id: loginId });
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
@@ -305,6 +306,8 @@ const upgradeAccount = async (userBody, loginId) => {
 
   const coordinates = Object.values(mLocation)
   const mapLocationData = { ...mLocation, coordinates }
+  // const coordinates = Object.values(mapLocation)
+  // const mapLocationData = { ...mapLocation, coordinates }
 
   user.accountType = accountType;
   user.location = location;
@@ -346,10 +349,11 @@ const upgradeAccount = async (userBody, loginId) => {
 
 // update account
 const updatedAccount = async (userBody, loginEmail, file, ip) => {
-  console.log(userBody)
-  const { dateOfBirth, businessName, businessNumber, businessEmail, businessDescription, businessWebsite, businessHours, businessLocation, name, phoneNumber, email, organisationName, organisationNumber, organisationEmail, organisationDescription, organisationWebsite, organisationLocation } = userBody;
+  // console.log("Gorom Address---", userBody)
+  const { dateOfBirth, businessName, businessNumber, businessEmail, businessDescription, businessWebsite, businessHours, businessLocation, name, phoneNumber, email, organisationName, organisationNumber, organisationEmail, organisationDescription, organisationWebsite, organisationLocation, account_holder_name, account_holder_type, routing_number, account_number } = userBody;
 
   const user = await User.findOne({ email: loginEmail });
+
 
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, "User not Found");
@@ -358,19 +362,22 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
 
 
   if (user.accountType === 'business') {
+    const businessLocationData = JSON.parse(businessLocation);
+
     user.businessName = businessName;
     user.businessNumber = businessNumber;
     user.businessEmail = businessEmail;
     user.businessDescription = businessDescription;
     user.businessWebsite = businessWebsite;
     user.businessHours = businessHours;
-    user.location = !businessLocation ? user.location : businessLocation;
+    user.location = !businessLocationData.city ? user.location : businessLocationData.city;
 
 
     const dateComponents = dateOfBirth?.split("/");
     const day = parseInt(dateComponents[0]);
     const month = parseInt(dateComponents[1]);
     const year = parseInt(dateComponents[2]);
+
 
     const fileUpload = await stripe.files.create({
       purpose: 'identity_document',
@@ -411,20 +418,20 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
         name: businessName,
         product_description: businessDescription,
         support_address: {
-          city: 'New York',
-          country: 'US',
-          line1: businessLocation,
-          postal_code: '10001',
-          state: 'NY',
+          city: businessLocationData?.city,
+          country: businessLocationData?.country,
+          line1: businessLocationData?.line1,
+          postal_code: businessLocationData?.postal_code,
+          state: businessLocationData?.state,
         },
       },
       company: {
         address: {
-          city: 'New York',
-          country: 'US',
-          line1: businessLocation,
-          postal_code: '10001',
-          state: 'NY',
+          city: businessLocationData?.city,
+          country: businessLocationData?.country,
+          line1: businessLocationData?.line1,
+          postal_code: businessLocationData?.postal_code,
+          state: businessLocationData?.state,
         },
       },
       individual: {
@@ -437,13 +444,13 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
         first_name: user.name,
         last_name: ' ',
         id_number: '888867530',
-        phone: '8888675309',
+        phone: businessNumber,
         address: {
-          city: 'New York',
-          country: 'US',
-          line1: businessLocation,
-          postal_code: '10001',
-          state: 'NY',
+          city: businessLocationData?.city,
+          country: businessLocationData?.country,
+          line1: businessLocationData?.line1,
+          postal_code: businessLocationData?.postal_code,
+          state: businessLocationData?.state,
         },
         verification: {
           document: {
@@ -461,10 +468,10 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
         object: 'bank_account',
         country: 'US',
         currency: 'usd',
-        account_holder_name: user.name,
-        account_holder_type: 'individual',
-        routing_number: "110000000",
-        account_number: '000123456789',
+        account_holder_name: account_holder_name,
+        account_holder_type: account_holder_type,
+        routing_number: routing_number,
+        account_number: account_number,
       },
     });
 
@@ -480,12 +487,15 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
     user.phoneNumber = !phoneNumber ? user.phoneNumber : phoneNumber;
     user.email = !email ? user.email : email;
   } else if (user.accountType === 'organisation') {
+
+    const organisationLocationData = JSON.parse(organisationLocation);
+
     user.organisationName = organisationName;
     user.organisationNumber = organisationNumber;
     user.organisationEmail = organisationEmail;
     user.organisationDescription = organisationDescription;
     user.organisationWebsite = organisationWebsite;
-    user.location = !organisationLocation ? user.location : organisationLocation;
+    user.location = !organisationLocationData.city ? user.location : organisationLocationData.city;
 
 
     const dateComponents = dateOfBirth.split("/");
@@ -532,20 +542,20 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
         name: organisationName,
         product_description: organisationDescription,
         support_address: {
-          city: 'New York',
-          country: 'US',
-          line1: organisationLocation,
-          postal_code: '10001',
-          state: 'NY',
+          city: organisationLocationData?.city,
+          country: organisationLocationData?.country,
+          line1: organisationLocationData?.line1,
+          postal_code: organisationLocationData?.postal_code,
+          state: organisationLocationData?.state,
         },
       },
       company: {
         address: {
-          city: 'New York',
-          country: 'US',
-          line1: organisationLocation,
-          postal_code: '10001',
-          state: 'NY',
+          city: organisationLocationData?.city,
+          country: organisationLocationData?.country,
+          line1: organisationLocationData?.line1,
+          postal_code: organisationLocationData?.postal_code,
+          state: organisationLocationData?.state,
         },
       },
       individual: {
@@ -558,13 +568,13 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
         first_name: user.name,
         last_name: ' ',
         id_number: '888867530',
-        phone: '8888675309',
+        phone: organisationNumber,
         address: {
-          city: 'New York',
-          country: 'US',
-          line1: organisationLocation,
-          postal_code: '10001',
-          state: 'NY',
+          city: organisationLocationData?.city,
+          country: organisationLocationData?.country,
+          line1: organisationLocationData?.line1,
+          postal_code: organisationLocationData?.postal_code,
+          state: organisationLocationData?.state,
         },
         verification: {
           document: {
@@ -582,10 +592,10 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
         object: 'bank_account',
         country: 'US',
         currency: 'usd',
-        account_holder_name: user.name,
-        account_holder_type: 'individual',
-        routing_number: "110000000",
-        account_number: '000123456789',
+        account_holder_name: account_holder_name,
+        account_holder_type: account_holder_type,
+        routing_number: routing_number, /// routing number for external account
+        account_number: account_number, /// account number for external account
       },
     });
 
@@ -596,15 +606,15 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
 
   if (file) {
 
-    const defaultPath = 'public\\uploads\\users\\user.png';
+    const defaultPath = 'public\\uploads\\product\\user.png';
     // console.log('req.file', file.filename, user.image.path, defaultPath);
-    if (user.image.path !== defaultPath) {
-      await unlinkImage(user.image.path);
-    }
+    // if (user?.image?.path !== defaultPath) {
+    //   await unlinkImage(user?.image?.path);
+    // }
 
     user.image = {
       publicFileUrl: `${process.env.IMAGE_UPLOAD_BACKEND_DOMAIN}/uploads/users/${file?.filename}`,
-      path: file.path
+      path: `/uploads/users/${file?.filename}`
     }
   }
 
@@ -810,10 +820,6 @@ const totalIncomeRatio = async (query) => {
   return data;
 };
 
-
-
-
-
 // Update User
 const updateUser = async (userBody, file) => {
 
@@ -840,7 +846,7 @@ const updateUser = async (userBody, file) => {
 
     user.image = {
       publicFileUrl: `${process.env.IMAGE_UPLOAD_BACKEND_DOMAIN}/uploads/users/${file?.file?.filename}`,
-      path: file.file.path
+      path: `/uploads/users/${file?.file?.filename}`
     }
   }
 

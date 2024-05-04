@@ -6,6 +6,8 @@ const paymentSchema = new mongoose.Schema({
     userAccountType: { type: String },
     packageDuration: { type: String },
     receiveId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
 },
     { timestamps: true },
 

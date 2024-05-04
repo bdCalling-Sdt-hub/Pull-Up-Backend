@@ -55,15 +55,36 @@ const userSchema = new mongoose.Schema({
     expirationDate: { type: Date },
 
     averageRating: { type: Number },
+
+    account_holder_name: { type: String },
+    account_holder_type: { type: String },
+    routing_number: { type: String },
+    account_number: { type: String },
+
     stripeConnectAccountId: { type: String, required: false },
-}, { timestamps: true }, {
+}, {
+    timestamps: true,
     toJSON: {
+        virtuals: true,
         transform(doc, ret) {
             delete ret.password;
-        },
+        }
     },
 },
+    // {
+    //     toJSON: {
+    //         virtuals: true,
+    //         transform(doc, ret) {
+    //             delete ret.password;
+    //         }
+    //     },
+    // },
 
 );
+
+userSchema.virtual('isExpiration').get(function () {
+    const currentDate = new Date();
+    return this.expirationDate && this.expirationDate < currentDate;
+})
 
 module.exports = mongoose.model('User', userSchema);

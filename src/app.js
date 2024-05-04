@@ -58,25 +58,25 @@ app.use(cors(
 // );
 
 
-//initilizing socketIO
-const http = require('http');
-const socketIo = require('socket.io');
-const server = http.createServer(app);
-const io = socketIo(server, {
-    cors: {
-        origin: "*"
-    }
-});
+// //initilizing socketIO
+// const http = require('http');
+// const socketIo = require('socket.io');
+// const server = http.createServer(app);
+// const io = socketIo(server, {
+//     cors: {
+//         origin: "*"
+//     }
+// });
 
-const socketIO = require("./helpers/socketIO");
-socketIO(io);
+// const socketIO = require("./helpers/socketIO");
+// socketIO(io);
 
-global.io = io
+// global.io = io
 
-const socketIOPort = process.env.SOCKET_IO_PORT
-server.listen(socketIOPort, () => {
-    console.log(`Server is listening on port: ${socketIOPort}`);
-});
+// const socketIOPort = process.env.SOCKET_IO_PORT
+// server.listen(socketIOPort, () => {
+//     console.log(`Server is listening on port: ${socketIOPort}`);
+// });
 
 
 //initilizing API routes

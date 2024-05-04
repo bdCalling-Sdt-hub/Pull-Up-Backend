@@ -3,7 +3,7 @@ const response = require("../helpers/response");
 const jwt = require('jsonwebtoken');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
-const { addProduct, getAllProducts, getSingleProduct, nerByProduct, findKeywords, getShopes, getSingleShop, userWiseProducts } = require('../services/productService');
+const { addProduct, getAllProducts, getSingleProduct, nerByProduct, findKeywords, getShopes, getSingleShop, userWiseProducts, getSingleShopByProduct, getProductHistory, getReceiverProductHistory } = require('../services/productService');
 
 
 // create a user
@@ -24,6 +24,16 @@ const userWiseProduct = catchAsync(async (req, res) => {
     const result = await userWiseProducts(req.query);
     sendResponse(res, { statusCode: 200, data: result, message: 'User Wise Product Retrieve successfully', success: true })
 });
+
+const productHistory = catchAsync(async (req, res) => {
+    const result = await getProductHistory(req.user.userId)
+    sendResponse(res, { statusCode: 200, data: result, message: 'User Retrieve successfully', success: true })
+})
+
+const receiverProductHistory = catchAsync(async (req, res) => {
+    const result = await getReceiverProductHistory(req.user.userId)
+    sendResponse(res, { statusCode: 200, data: result, message: 'User Retrieve successfully', success: true })
+})
 
 const singleProduct = catchAsync(async (req, res) => {
     const result = await getSingleProduct(req.params.id)
@@ -50,14 +60,22 @@ const singleShop = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, data: result, message: 'Shop Retrieve successfully', success: true })
 })
 
+const singleShopByProduct = catchAsync(async (req, res) => {
+    const result = await getSingleShopByProduct(req.params.id)
+    sendResponse(res, { statusCode: 200, data: result, message: 'Shop Retrieve successfully', success: true })
+})
+
 
 module.exports = {
     createProduct,
     allProduct,
     userWiseProduct,
     singleProduct,
+    productHistory,
+    receiverProductHistory,
     nerByProducts,
     findKeyword,
     findShops,
-    singleShop
+    singleShop,
+    singleShopByProduct
 }
