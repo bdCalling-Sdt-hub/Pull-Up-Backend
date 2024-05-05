@@ -3,10 +3,12 @@ const AppError = require('../errors/AppError');
 const User = require('../models/User');
 const QueryBuilder = require('../builder/QueryBuilder');
 const Event = require('../models/Event');
+const Payment = require('../models/Payment');
+const { default: mongoose } = require('mongoose');
 
 // Create a new user
 const addEvent = async (userBody, email, file) => {
-    const { name, description, price, location, date } = userBody;
+    const { name, description, price, location, dateTime } = userBody;
 
     // Check if the user already exists
     const user = await User.findOne({ email });
@@ -31,7 +33,8 @@ const addEvent = async (userBody, email, file) => {
             price,
             location,
             image: imageUrl,
-            userId: user._id
+            userId: user._id,
+            dateTime,
         });
 
         return event;
@@ -67,6 +70,110 @@ const userWiseEvents = async (query) => {
     return { result, meta }
 }
 
+const getEventHistory = async (userId) => {
+
+    const result = await Payment.find({ userId: userId, eventId: { $exists: true } }).populate('userId eventId').select('userId eventId')
+    return result
+}
+
+const getReceiverEventHistory = async (userId) => {
+    console.log(userId);
+    // Find payments where receiveId matches the provided userId
+    const result = await Payment.aggregate([
+        {
+            $match: { receiveId: new mongoose.Types.ObjectId(userId) }
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'receiveId',
+                foreignField: '_id',
+                as: 'receiveId'
+            }
+        },
+        {
+            $unwind: '$receiveId'
+        },
+        {
+            $match: { 'receiveId.accountType': 'organisation' } // Filter by accountType 'business'
+        },
+        {
+            $lookup: {
+                from: 'events',
+                localField: 'eventId',
+                foreignField: '_id',
+                as: 'eventId'
+            }
+        },
+        {
+            $unwind: '$eventId'
+        },
+        {
+            $project: {
+                receiveId: 1,
+                eventId: 1
+            }
+        }
+    ]);
+
+    return result
+}
+
+const eventJoin = async () => {
+
+    const eventData = await Event.aggregate([
+        {
+            $lookup: {
+                from: "payments",
+                let: { eventId: "$_id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: { $eq: ["$eventId", "$$eventId"] }
+                        }
+                    }
+                ],
+                as: "paymentData"
+            }
+        },
+        {
+            $unwind: {
+                path: "$paymentData",
+                preserveNullAndEmptyArrays: true // Preserve documents without a matching payment
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "paymentData.userId",
+                foreignField: "_id",
+                as: "userData"
+            }
+        },
+        {
+            $unwind: {
+                path: "$userData",
+                preserveNullAndEmptyArrays: true // Preserve documents without a matching payment
+            }
+        },
+        {
+            $group: {
+                _id: "$_id", // Group by event ID
+                eventData: { $first: "$$ROOT" }, // Preserve eventData
+                userData: { $push: "$userData" } // Collect user data for each group
+            }
+        }
+    ]);
+
+    // console.log(eventData);
+
+
+
+
+    return eventData;
+
+}
+
 const getSingleEvent = async (id) => {
     const result = await Event.findById(id)
     return result
@@ -79,5 +186,8 @@ module.exports = {
     addEvent,
     getAllEvents,
     userWiseEvents,
+    getEventHistory,
+    getReceiverEventHistory,
+    eventJoin,
     getSingleEvent
 }

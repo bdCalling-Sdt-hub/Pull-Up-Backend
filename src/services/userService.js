@@ -292,8 +292,6 @@ const resetUpdatePasswordApp = async (userBody) => {
   }
 }
 
-
-
 // Upgrade Account
 const upgradeAccount = async (userBody, loginId) => {
   const { accountType, location, packageDuration, activationDate, mapLocation } = userBody;
@@ -523,6 +521,8 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
 
     const frontFileId = fileUpload.id;
     const backFileId = backFileUpload.id;
+
+    console.log("Naim gorom Basat", frontFileId, backFileId);
 
     const account = await stripe.accounts.create({
       type: 'custom',
@@ -896,7 +896,24 @@ const getChangePassword = async (body, email) => {
 }
 
 
+const deActiveUsers = async (body, email) => {
+  const { currentPassword } = body;
+  console.log(currentPassword)
 
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+
+  if (!passwordMatch) {
+    throw new AppError(httpStatus.NOT_ACCEPTABLE, 'Current password is incorrect');
+  }
+
+  return null
+}
 
 
 module.exports = {
@@ -918,5 +935,6 @@ module.exports = {
   updateUser,
   getUserProfile,
   getSingleUser,
-  getChangePassword
+  getChangePassword,
+  deActiveUsers
 }

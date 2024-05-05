@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getNotifications } = require('../services/notificationService');
+const { getNotifications, userNotifications } = require('../services/notificationService');
 const sendResponse = require('../utils/sendResponse');
 const catchAsync = require('../utils/catchAsync');
 
@@ -38,5 +38,13 @@ const getAllNotifications = catchAsync(async (req, res) => {
   const result = await getNotifications(req.query)
   sendResponse(res, { statusCode: 200, data: result, message: 'Notification successfully', success: true })
 });
+const getUserNotifications = catchAsync(async (req, res) => {
+  req.query.receiver = req.user?.userId;
+  const result = await userNotifications(req.query)
+  sendResponse(res, { statusCode: 200, data: result, message: 'Notification successfully', success: true })
+});
 
-module.exports = { getAllNotifications }
+module.exports = {
+  getAllNotifications,
+  getUserNotifications
+}

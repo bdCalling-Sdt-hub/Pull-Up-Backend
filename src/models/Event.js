@@ -13,6 +13,7 @@ const eventSchema = new mongoose.Schema({
         }
     },
     location: { type: String, required: true },
+    dateTime: { type: Date },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true }, {
     toJSON: {

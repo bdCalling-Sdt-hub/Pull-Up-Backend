@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
-const { getAllNotifications } = require('../controllers/notificationController');
+const { getAllNotifications, getUserNotifications } = require('../controllers/notificationController');
 
-router.get('/', auth('admin', 'user'), getAllNotifications);
+router.get('/', auth('admin'), getAllNotifications);
+router.get('/user-notification', auth('user'), getUserNotifications);
 
 module.exports = router;

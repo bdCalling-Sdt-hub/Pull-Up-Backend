@@ -32,6 +32,19 @@ const getNotifications = async (query) => {
         .fields();
 
     const result = await productModel.modelQuery;
+    const meta = await productModel.meta();
+    return { result, meta }
+}
+
+const userNotifications = async (query) => {
+    const productModel = new QueryBuilder(Notification.find(), query)
+        .search()
+        .filter()
+        .paginate()
+        .sort()
+        .fields();
+
+    const result = await productModel.modelQuery;
     console.log(result)
     const meta = await productModel.meta();
     return { result, meta }
@@ -41,5 +54,6 @@ module.exports = {
     addNotification,
     addMultipleNofiications,
     getNotificationById,
-    getNotifications
+    getNotifications,
+    userNotifications
 }

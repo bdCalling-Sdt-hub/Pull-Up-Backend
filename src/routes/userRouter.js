@@ -1,5 +1,5 @@
 const express = require('express');
-const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount, usersStatistics, changePassword, forgotPasswordApp, forgotPasswordVerifyOneTimeCodeApp, resetUpdatedPasswordApp, getProfile, totalIncomeRatios, packagePurchaseRatios } = require('../controllers/userController');
+const { signUp, signIn, updateProfile, allUsers, singleUser, createUser, verifyEmail, forgotPassword, forgotPasswordVerifyOneTimeCode, resetUpdatedPassword, upgradedAccount, updateAccount, usersStatistics, changePassword, forgotPasswordApp, forgotPasswordVerifyOneTimeCodeApp, resetUpdatedPasswordApp, getProfile, totalIncomeRatios, packagePurchaseRatios, deActiveUser } = require('../controllers/userController');
 const router = express.Router();
 const fs = require('fs');
 const userFileUploadMiddleware = require("../middlewares/fileUpload");
@@ -32,6 +32,9 @@ router.patch('/fp-verify-code', auth('admin', 'user'), forgotPasswordVerifyOneTi
 router.patch('/update-password', auth('admin', 'user'), resetUpdatedPassword);
 // change password
 router.patch('/change-password', auth('admin', 'user'), changePassword);
+router.patch('/deactive-users', auth( 'user'), deActiveUser);
+
+
 
 // App 
 router.patch('/forgot-password', forgotPasswordApp);
