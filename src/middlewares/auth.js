@@ -82,7 +82,10 @@ const auth = (...userRoles) => {
         // }
         if (!isIdExit) {
             throw new AppError(httpStatus.NOT_FOUND, "user not found");
+
         }
+
+
         if (userRoles && !userRoles.includes(role)) {
             throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized ");
         }

@@ -194,7 +194,7 @@ const getAllTransactions = async (query, email) => {
         }
     }
 
-    const paymentModel = new QueryBuilder(Payment.find().populate('userId'), await query)
+    const paymentModel = new QueryBuilder(Payment.find().populate('userId'), query)
         .search()
         .filter()
         .paginate()
@@ -202,6 +202,7 @@ const getAllTransactions = async (query, email) => {
         .fields();
 
     const result = await paymentModel.modelQuery;
+    console.log(result)
     const meta = await paymentModel.meta();
 
     return { result, meta }

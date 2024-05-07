@@ -295,15 +295,23 @@ const resetUpdatePasswordApp = async (userBody) => {
 // Upgrade Account
 const upgradeAccount = async (userBody, loginId) => {
   const { accountType, location, packageDuration, activationDate, mapLocation } = userBody;
-  const mLocation = JSON.parse(mapLocation)
+
+  let mLocation
+  if (mapLocation) {
+    mLocation = JSON.parse(mapLocation)
+    console.log(mLocation);
+  }
 
   const user = await User.findOne({ _id: loginId });
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'User not found');
   }
 
-  const coordinates = Object.values(mLocation)
-  const mapLocationData = { ...mLocation, coordinates }
+  let mapLocationData;
+  if (mapLocation) {
+    const coordinates = Object.values(mLocation)
+    mapLocationData = { ...mLocation, coordinates }
+  }
   // const coordinates = Object.values(mapLocation)
   // const mapLocationData = { ...mapLocation, coordinates }
 
@@ -348,7 +356,7 @@ const upgradeAccount = async (userBody, loginId) => {
 // update account
 const updatedAccount = async (userBody, loginEmail, file, ip) => {
   // console.log("Gorom Address---", userBody)
-  const { dateOfBirth, businessName, businessNumber, businessEmail, businessDescription, businessWebsite, businessHours, businessLocation, name, phoneNumber, email, organisationName, organisationNumber, organisationEmail, organisationDescription, organisationWebsite, organisationLocation, account_holder_name, account_holder_type, routing_number, account_number } = userBody;
+  const { dateOfBirth, businessName, businessNumber, businessEmail, businessDescription, businessWebsite, businessHours, businessLocation, name, phoneNumber, email, location, organisationName, organisationNumber, organisationEmail, organisationDescription, organisationWebsite, organisationLocation, account_holder_name, account_holder_type, routing_number, account_number } = userBody;
 
   const user = await User.findOne({ email: loginEmail });
 
@@ -484,6 +492,7 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
     user.name = !name ? user.name : name;
     user.phoneNumber = !phoneNumber ? user.phoneNumber : phoneNumber;
     user.email = !email ? user.email : email;
+    user.location = !location ? user.location : location;
   } else if (user.accountType === 'organisation') {
 
     const organisationLocationData = JSON.parse(organisationLocation);
@@ -600,10 +609,10 @@ const updatedAccount = async (userBody, loginEmail, file, ip) => {
     });
 
     user.stripeConnectAccountId = account.id;
-  } else {
+  }
+  else {
     throw new AppError(httpStatus.METHOD_NOT_ALLOWED, 'Invalid Account type')
   }
-
   if (file) {
 
     const defaultPath = 'public\\uploads\\product\\user.png';
@@ -801,9 +810,9 @@ const totalIncomeRatio = async (query) => {
     console.log(dailyData)
 
     // Calculate total monthly and weekly payments
-    const monthlyTotal = monthlyData.reduce((total, item) => total + item?.paymentData?.amount, 0);
-    const weeklyTotal = weeklyData.reduce((total, item) => total + item?.paymentData?.amount, 0);
-    const dailyTotal = dailyData.reduce((total, item) => total + item?.paymentData?.amount, 0);
+    const monthlyTotal = monthlyData.reduce((total, item) => total + (item?.paymentData?.amount / 100), 0);
+    const weeklyTotal = weeklyData.reduce((total, item) => total + (item?.paymentData?.amount / 100), 0);
+    const dailyTotal = dailyData.reduce((total, item) => total + (item?.paymentData?.amount / 100), 0);
 
     // Format month name (Jan, Feb, etc.)
     const monthName = dayjs(startDate).format('MMM');
