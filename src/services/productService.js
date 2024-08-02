@@ -164,8 +164,58 @@ const getReceiverProductHistory = async (userId) => {
     return result
 }
 
+// const nerByProduct = async (query) => {
+//     const { longitude, latitude, accountType } = query;
+
+//     if (!longitude || !latitude || !accountType) {
+//         throw new AppError(httpStatus.BAD_REQUEST, 'Missing required parameters: longitude, latitude, or accountType');
+//     }
+
+//     // Ensure the longitude and latitude are numbers
+//     const lon = parseFloat(longitude);
+//     const lat = parseFloat(latitude);
+
+//     if (isNaN(lon) || isNaN(lat)) {
+//         throw new AppError(httpStatus.BAD_REQUEST, 'Invalid longitude or latitude');
+//     }
+
+//     try {
+//         // Check if the geospatial index exists
+//         const indexes = await User.collection.indexes();
+//         const hasGeoIndex = indexes.some(index => index.key && index.key.mapLocation === '2dsphere');
+
+//         if (!hasGeoIndex) {
+//             throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Geospatial index on mapLocation not found');
+//         }
+
+//         // Run the aggregation query
+//         const neaByProduct = await User.aggregate([
+//             {
+//                 $geoNear: {
+//                     near: { type: "Point", coordinates: [lon, lat] },
+//                     key: "mapLocation",
+//                     distanceField: "dist.calculated",
+//                     maxDistance: 5000 * 1609, // Convert miles to meters
+//                     spherical: true
+//                 }
+//             },
+//             {
+//                 $match: {
+//                     accountType: accountType
+//                 }
+//             }
+//         ]);
+
+//         return neaByProduct;
+//     } catch (error) {
+//         throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+//     }
+// }
+
+
 const nerByProduct = async (query) => {
     const { longitude, latitude, accountType } = query;
+    console.log("Hello Query", longitude, latitude, accountType)
 
     if (!query) {
         throw new AppError(httpStatus.NOT_FOUND, 'Params not found');
@@ -177,7 +227,7 @@ const nerByProduct = async (query) => {
                 near: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] },
                 key: "mapLocation",
                 distanceField: "dist.calculated",
-                maxDistance: parseFloat(5000) * 1609,
+                maxDistance: parseFloat(10000) * 1609,
                 // query: { category: "Parks" },
                 // includeLocs: "dist.location",
                 spherical: true

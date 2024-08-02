@@ -19,7 +19,8 @@ const bodyParser = require('body-parser');
 const globalErrorHandler = require('./middlewares/GlobalErrorHanlder');
 require('dotenv').config();
 const app = express();
-
+// app.set('view engine', 'ejs');
+// app.set('views', './views');
 // Connect to the MongoDB database
 mongoose.connect(process.env.MONGODB_CONNECTION, {});
 // console.log(process.env.MONGODB_CONNECTION)
@@ -36,19 +37,16 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
+// app.get('/profile', (req, res) => {
+//   res.render('profile');
+// });
 // Enable CORS
-app.use(cors(
-    {
-        origin: "*",
-        // [
-        //   process.env.ALLOWED_CLIENT_URL_DASHBOARD,
-        //   process.env.ALLOWED_CLIENT_URL_WEB,
-        //   process.env.ALLOWED_CLIENT_URL_SUB_DASHBOARD
-        // ],
-        optionsSuccessStatus: 200
-    }
-));
+app.use(
+  cors({
+    origin: "*",
+    optionsSuccessStatus: 200,
+  })
+);
 
 
 // app.use(
@@ -94,6 +92,7 @@ app.use('/api/payment', paymentRouter);
 app.use('/api/favorite', favoriteRouter);
 
 //testing API is alive
+
 app.get('/test', (req, res) => {
     res.send(req.t('Back-end is responding!!'))
 })

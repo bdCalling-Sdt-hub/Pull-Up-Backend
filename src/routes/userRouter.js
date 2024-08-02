@@ -9,9 +9,10 @@ const uploadUsers = userFileUploadMiddleware(UPLOADS_FOLDER_USERS);
 const { isValidUser, verifyRefreshToken } = require('../middlewares/auth')
 const validationMiddleware = require('../middlewares/user/signupValidation');
 const auth = require('../middlewares/auth');
+const upload = require('../middlewares/imagesUpload');
 
 if (!fs.existsSync(UPLOADS_FOLDER_USERS)) {
-    // If not, create the folder
+    // If not, create the folder 
     fs.mkdirSync(UPLOADS_FOLDER_USERS, { recursive: true }, (err) => {
         if (err) {
             console.error("Error creating uploads folder:", err);
@@ -32,7 +33,7 @@ router.patch('/fp-verify-code', auth('admin', 'user'), forgotPasswordVerifyOneTi
 router.patch('/update-password', auth('admin', 'user'), resetUpdatedPassword);
 // change password
 router.patch('/change-password', auth('admin', 'user'), changePassword);
-router.patch('/deactive-users', auth( 'user'), deActiveUser);
+router.patch('/deactive-users', auth('user'), deActiveUser);
 
 
 
@@ -43,7 +44,7 @@ router.patch('/updated-password', resetUpdatedPasswordApp);
 
 // Account Upgrade
 router.post('/upgraded-account', auth('user'), upgradedAccount);
-router.post('/update-account', auth('user'), [uploadUsers.single("image")], updateAccount);
+router.post('/update-account', auth('user'), upload.uploadFiles, updateAccount);
 
 // User
 router.get('/', auth('admin'), allUsers);

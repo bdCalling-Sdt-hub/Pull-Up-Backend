@@ -42,14 +42,18 @@ const userSchema = new mongoose.Schema({
     organisationWebsite: { type: String },
 
     businessHours: { type: String },
+
     location: { type: String },
+
     mapLocation: {
-        type: {
-            latitude: Number,
-            longitude: Number,
-            coordinates: [Number]
-        }
+        // type: {
+        // latitude: Number,
+        // longitude: Number,
+        coordinates: [Number],
+        type: { type: String, default: 'Point' }
+        // }
     },
+
     packageDuration: { type: String, enum: ['daily', 'weekly', 'monthly'] },
     activationDate: { type: Date },
     expirationDate: { type: Date },

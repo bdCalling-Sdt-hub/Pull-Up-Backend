@@ -94,6 +94,7 @@ const addConnectIntentPayment = async (body, email, productId) => {
     });
 
     createdPayment.save();
+    console.log("Pyment created", createdPayment)
 
     console.log("Product User Id", receiveUser._id)
     const userNotification = {

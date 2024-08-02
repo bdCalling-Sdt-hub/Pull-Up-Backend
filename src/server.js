@@ -2,9 +2,9 @@ const app = require('./app');
 require('dotenv').config();
 // const port = process.env.PORT || 3001;
 
-// app.get('/', (req, res) => {
-//     res.send('Call Center Backend is Runinng!')
-// })
+app.get('/test', (req, res) => {
+    res.send('Call Center Backend is Runinng!')
+})
 
 // app.listen(port, () => {
 //     console.log(`Call Center is listening on port ${port}`)
@@ -26,5 +26,4 @@ const io = socketIo(server, {
 
 const socketIO = require("./helpers/socketIO");
 socketIO(io);
-
 global.io = io

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deactivate Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="">
+    <section class="w-full h-full mx-auto" id="settings">
+        <h3 class="text-3xl font-bold text-center mb-10 mt-20">1. Open the App and go to setting click Deactivate
+            Account
+        </h3>
+        <div class="flex items-center justify-between">
+            <div class="mockup-phone ">
+                <div class="camera"></div>
+                <div class="display">
+                    <div class="artboard p-5 phone-1 bg-white">
+                        <div class="flex justify-start items-start">
+                            <h3 class="text-3xl font-bold mt-3">Settings</h3>
+                        </div>
+                        <div class="flex justify-between items-center mt-8">
+                            <div class="flex justify-center items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-bell-dot">
+                                    <path
+                                        d="M19.4 14.9C20.2 16.4 21 17 21 17H3s3-2 3-9c0-3.3 2.7-6 6-6 .7 0 1.3.1 1.9.3" />
+                                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                                    <circle cx="18" cy="8" r="3" />
+                                </svg>
+                                <h3 class="text-lg">Push Notifications</h3>
+                            </div>
+                            <input type="checkbox" class="toggle" checked="checked" />
+                        </div>
+                        <div
+                            class="flex justify-between items-center mt-4 border border-gray-400 px-3 py-2 rounded-md hover:cursor-pointer">
+                            <div class="flex justify-center items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-eraser">
+                                    <path
+                                        d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
+                                    <path d="M22 21H7" />
+                                    <path d="m5 11 9 9" />
+                                </svg>
+                                <h3 class="text-lg">Clear History</h3>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-chevron-right">
+                                <path d="m9 18 6-6-6-6" />
+                            </svg>
+                        </div>
+                        <div id="deleteButton"
+                            class="flex justify-between items-center mt-4 border border-gray-400 px-3 py-2 rounded-md hover:cursor-pointer">
+                            <div class="flex justify-center items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-user-x">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <line x1="17" x2="22" y1="8" y2="13" />
+                                    <line x1="22" x2="17" y1="8" y2="13" />
+                                </svg>
+                                <h3 class="text-lg">Deactivate Account</h3>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-chevron-right">
+                                <path d="m9 18 6-6-6-6" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <ul class="flex justify-center mb-5  menu menu-horizontal bg-black text-white rounded-box">
+                        <li>
+                            <a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-house">
+                                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+                                    <path
+                                        d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                </svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-bell">
+                                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                                </svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-plus">
+                                    <path d="M5 12h14" />
+                                    <path d="M12 5v14" />
+                                </svg>
+                            </a>
+                        </li>
+                        <li><a href="" class="border border-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-settings">
+                                    <path
+                                        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </a></li>
+                        <li><a href="">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-user">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="w-full h-full mx-auto mt-5" id="delete">
+        <h3 class="text-3xl font-bold text-center mb-10 mt-20">2. select Option , and Enter your Password then press
+            Deactivate Your Account
+        </h3>
+        <div class="flex items-center justify-between">
+            <div class="mockup-phone ">
+                <div class="camera"></div>
+                <div class="display">
+                    <div class="artboard p-5 phone-1 bg-white">
+
+                        <div class="flex justify-start items-center gap-3 mt-5">
+                            <button class="px-3 py-3 rounded-full bg-black text-white" id="backButton">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-arrow-left">
+                                    <path d="m12 19-7-7 7-7" />
+                                    <path d="M19 12H5" />
+                                </svg>
+                            </button>
+
+                            <h3 class="text-2xl font-bold">Deactivate Account</h3>
+                        </div>
+                        <h3 class="text-sm ml-8 mt-2 text-black">Sad to See You Go</h3>
+                        <div class="mt-5 ml-3">
+                            <h1 class="text-3xl mb-5 font-bold">Select the option</h1>
+
+                            <form action="" class="flex flex-col gap-3">
+                                <div class="form-control">
+                                    <label class="flex justify-start items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="radio-10" class="radio checked:bg-blue-500"
+                                            checked="checked" />
+                                        <span class="label-text">Taking a break</span>
+                                    </label>
+                                </div>
+                                <div class="form-control">
+                                    <label class="flex justify-start items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="radio-10" class="radio checked:bg-blue-500" />
+                                        <span class="label-text">Privacy COncerns</span>
+                                    </label>
+                                </div>
+                                <div class="form-control">
+                                    <label class="flex justify-start items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="radio-10" class="radio checked:bg-blue-500" />
+                                        <span class="label-text">Account Security</span>
+                                    </label>
+                                </div>
+                                <div class="form-control">
+                                    <label class="flex justify-start items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="radio-10" class="radio checked:bg-blue-500" />
+                                        <span class="label-text">Lack of Interest</span>
+                                    </label>
+                                </div>
+                                <div class="form-control">
+                                    <label class="flex justify-start items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="radio-10" class="radio checked:bg-blue-500" />
+                                        <span class="label-text">Personal Reasons</span>
+                                    </label>
+                                </div>
+                                <div class="form-control">
+                                    <label class="flex justify-start items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="radio-10" class="radio checked:bg-blue-500" />
+                                        <span class="label-text">Other</span>
+                                    </label>
+                                </div>
+
+                                <label class="form-control w-full max-w-xs">
+                                    <div class="label">
+                                        <span class="label-text">Enter Your Password</span>
+                                    </div>
+                                    <input required="password is required" type="password"
+                                        placeholder="Enter Your Password" class="input input-info w-full max-w-xs" />
+
+                                </label>
+                                <button class="btn btn-outline btn-info hover:text-white w-full">Deactivate Your
+                                    Account</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <script>
+            const settingsPage = document.getElementById("settings")
+            const deletePage = document.getElementById("delete")
+            const deleteButton = document.getElementById("deleteButton")
+            const backButton = document.getElementById("backButton")
+
+            deleteButton.addEventListener("click", function () {
+                settingsPage.classList.add("hidden")
+                deletePage.classList.remove("hidden")
+            })
+            backButton.addEventListener("click", function () {
+                deletePage.classList.add("hidden")
+                settingsPage.classList.remove("hidden")
+            })
+        </script> -->
+    </section>
+
+    <!-- Settings Page -->
+    <!-- <div class="">
+        <h1 class="text-xl mb-4">Settings</h1>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <span>Push Notifications</span>
+                <input type="checkbox" class="toggle-checkbox" checked>
+            </div>
+            <div>
+                <button class="w-full text-left p-4 bg-gray-800 rounded-md flex items-center justify-between">
+                    <span>Clear History</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-4a1 1 0 112 0v2a1 1 0 11-2 0v-2zm0-9a1 1 0 012 0v5a1 1 0 11-2 0V5z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <div>
+                <button class="w-full text-left p-4 bg-gray-800 rounded-md flex items-center justify-between">
+                    <span>Deactivate Account</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-4a1 1 0 112 0v2a1 1 0 11-2 0v-2zm0-9a1 1 0 012 0v5a1 1 0 11-2 0V5z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Deactivate Account Page -->
+    <!-- <div class="p-4">
+        <h1 class="text-xl mb-2">Deactivate Account</h1>
+        <p class="text-gray-500 mb-4">Sad to See You Go</p>
+        <form class="space-y-4">
+            <div class="space-y-2">
+                <p>Select the option</p>
+                <div>
+                    <input type="radio" id="taking-break" name="reason" value="taking-break" class="mr-2">
+                    <label for="taking-break">Taking a break</label>
+                </div>
+                <div>
+                    <input type="radio" id="privacy-concerns" name="reason" value="privacy-concerns" class="mr-2">
+                    <label for="privacy-concerns">Privacy Concerns</label>
+                </div>
+                <div>
+                    <input type="radio" id="account-security" name="reason" value="account-security" class="mr-2">
+                    <label for="account-security">Account Security</label>
+                </div>
+                <div>
+                    <input type="radio" id="lack-interest" name="reason" value="lack-interest" class="mr-2">
+                    <label for="lack-interest">Lack of Interest</label>
+                </div>
+                <div>
+                    <input type="radio" id="personal-reasons" name="reason" value="personal-reasons" class="mr-2">
+                    <label for="personal-reasons">Personal Reasons</label>
+                </div>
+                <div>
+                    <input type="radio" id="other" name="reason" value="other" class="mr-2">
+                    <label for="other">Other</label>
+                </div>
+            </div>
+            <div>
+                <label for="password" class="block mb-1">Enter Your Password</label>
+                <input type="password" id="password" name="password"
+                    class="w-full p-2 bg-gray-800 rounded-md text-white" placeholder="Enter Your Password">
+            </div>
+            <button type="submit" class="w-full py-2 bg-yellow-600 rounded-md">Deactivate Your Account</button>
+        </form>
+    </div> -->
+</body>
+
+</html>
